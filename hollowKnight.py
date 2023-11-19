@@ -26,13 +26,29 @@ def onKeyPress(app, key):
     elif key == 'd':
         player.move(+1)
     if key == 'o' and player.jumping == False:
-        player.jumping = True       
+        player.jumping = True
+     
 
 def onKeyHold(app, key):
     if 'a' in key:
         player.move(-1)
+        for terrain in terrainsList:
+            (isColliding, direction, reference) = checkColliding(terrain, player)
+            if isColliding == True:
+                if direction == 'right':
+                    player.x = reference - player.width
+                elif direction == 'left':
+                    player.x = reference
     elif 'd' in key:
         player.move(+1)
+        for terrain in terrainsList:
+            (isColliding, direction, reference) = checkColliding(terrain, player)
+            if isColliding == True:
+                if direction == 'right':
+                    player.x = reference - player.width
+                elif direction == 'left':
+                    player.x = reference
+        
 
 def onStep(app):
     if player.falling == True:
@@ -62,7 +78,6 @@ def checkColliding(terrain, player):
     if ((player.leftX > terrain.leftX) and (player.leftX < terrain.rightX) or
         (player.rightX > terrain.leftX) and (player.rightX < terrain.rightX)):
         if player.bottomY >= terrain.topY and player.bottomY <= terrain.bottomY:
-            print(player.previousPositions)
             if len(player.previousPositions) <= 2:
                 return (True, 'down', terrain.topY)
             previousX, previousY = player.previousPositions[-2]

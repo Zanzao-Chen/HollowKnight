@@ -23,7 +23,9 @@ class Player:
             newPosition = -(self.timer - self.y - (self.maxJumpHeight)**0.5) + self.maxJumpHeight
             self.y = newPosition
     def fall(self):
-        if self.falling == True:
+        if self.falling == True and self.jumping == False:
+            self.y += -self.timer
+        elif self.falling == True and self.jumping == True:
             self.y += -self.timer**0.5
 
     def getPlayerVertices(self):
