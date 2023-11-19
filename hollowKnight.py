@@ -2,13 +2,13 @@ from cmu_graphics import *
 from Player import *
 
 
-player = Player(50, 50)
+player = Player(100, 200)
 
 def onAppStart(app):
     app.stepsPerSecond = 30
 
 def redrawAll(app):
-    drawRect(player.x, player.y, 50, 50, fill = 'black')
+    drawRect(player.x, player.y, 20, 50, fill = 'black')
 
 def onKeyPress(app, key):
     if key == 'a':
@@ -26,16 +26,16 @@ def onKeyHold(app, key):
 
 def onStep(app):
     if player.jumping == True:
-        player.y += 1.5
+        player.y -= 1.5
         player.positions.append(player.y)
-        if player.y > 30 + player.positions[0]:
+        if player.y + 30 < player.positions[0]:
             player.jumping = False
             player.falling = True 
             player.positions = []
     if player.falling == True:
-        player.y -= 1.5
+        player.y += 1.5
         player.positions.append(player.y)
-        if player.y + 30 < player.positions[0]:
+        if player.y > 30 + player.positions[0]:
             player.jumping = False
             player.falling = False
             player.positions = []
