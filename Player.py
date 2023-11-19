@@ -9,17 +9,18 @@ class Player:
         self.positions = []
         self.timer = 0
         self.maxJumpHeight = 10
+        self.speed = 2
 
     def move(self, direction):
-        self.x += direction
+        self.x += direction*self.speed
 
     def jump(self):
+        
         self.positions.append(self.y)
         if self.jumping == True and self.y >= self.positions[0]:
             self.positions.append(self.y)
             newPosition = -(self.timer - self.y - (self.maxJumpHeight)**0.5) + self.maxJumpHeight
             if newPosition < self.positions[0]:
-                self.positions.pop()
                 self.jumping = False
                 self.y = self.positions[0]
                 self.positions = []
