@@ -15,7 +15,7 @@ def onKeyPress(app, key):
         player.move(-1)
     elif key == 'd':
         player.move(+1)
-    if key == 'o':
+    if key == 'o' and player.jumping == False and player.falling == False:
         player.jump()
 
 def onKeyHold(app, key):
@@ -28,6 +28,7 @@ def onStep(app):
     if player.jumping == True:
         player.y -= 1.5
         player.positions.append(player.y)
+        print(player.positions)
         if player.y + 30 < player.positions[0]:
             player.jumping = False
             player.falling = True 
