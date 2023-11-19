@@ -33,9 +33,3 @@ class Player:
         self.rightX = self.x + self.width
         self.topY = -self.y
         self.bottomY = -self.y + self.height
-
-        # topLeft = (self.x, self.y)
-        # topRight = (self.x + self.width, self.y)
-        # bottomLeft = (self.x, self.y + self.height)
-        # bottomRight = (self.x + self.width, self.y + self.height)
-        # return topLeft, topRight, bottomLeft, bottomRight
