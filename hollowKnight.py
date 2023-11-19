@@ -13,6 +13,9 @@ terrainsList = [flat1, flat2, flat3]
 
 def redrawAll(app):
     drawRect(player.x, -player.y, player.width, player.height, fill = 'black')
+    player.previousPositions.append((player.x, -player.y))
+    if len(player.previousPositions) > 5:
+        player.previousPositions = player.previousPositions[2:]
     for terrain in terrainsList:
         if terrain.type == 'Rectangle':
             drawRect(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
@@ -23,7 +26,7 @@ def onKeyPress(app, key):
     elif key == 'd':
         player.move(+1)
     if key == 'o' and player.jumping == False:
-        player.jumping = True
+        player.jumping = True       
 
 def onKeyHold(app, key):
     if 'a' in key:
@@ -32,7 +35,9 @@ def onKeyHold(app, key):
         player.move(+1)
 
 def onStep(app):
-    
+    if player.falling == True:
+        player.timer += 1
+        player.fall()
     if player.jumping == True:
         player.timer += 1
         player.jump()
@@ -47,6 +52,9 @@ def onStep(app):
                 player.y = terrain.bottomY  
             elif direction == 'down':
                 player.y = -(reference - player.height)
+                player.jumping = False
+                player.positions = []
+                player.timer = 0
 
 def checkColliding(terrain, player):
     player.getPlayerVertices()
@@ -54,18 +62,20 @@ def checkColliding(terrain, player):
     if ((player.leftX > terrain.leftX) and (player.leftX < terrain.rightX) or
         (player.rightX > terrain.leftX) and (player.rightX < terrain.rightX)):
         if player.bottomY >= terrain.topY and player.bottomY <= terrain.bottomY:
-            return (True, 'down', terrain.topY)
+            print(player.previousPositions)
+            if len(player.previousPositions) <= 2:
+                return (True, 'down', terrain.topY)
+            previousX, previousY = player.previousPositions[-2]
+            if previousY + player.height <= terrain.topY:
+                return (True, 'down', terrain.topY)
     if ((player.bottomY > terrain.topY and player.bottomY < terrain.bottomY) or 
         (player.topY > terrain.topY and player.topY < terrain.bottomY)):
         if player.rightX >= terrain.leftX and player.rightX <= terrain.rightX:
-            print(player.bottomY, terrain.topY, terrain.bottomY)
             return (True, 'right', terrain.leftX) 
     if ((player.bottomY > terrain.topY and player.bottomY < terrain.bottomY) or 
         (player.topY > terrain.topY and player.topY < terrain.bottomY)):
         if player.leftX <= terrain.rightX and player.leftX >= terrain.leftX:
             return (True, 'left', terrain.rightX) 
-
-
     return False, None, None
 
 def main():
