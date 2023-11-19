@@ -4,11 +4,10 @@ class Player:
         self.y = y
         self.level = level
         self.jumping = False
-    def move(self, x, direction):
-        self.x = x
+        self.falling = False
+        self.positions = []
+    def move(self, direction):
         self.x += direction
-    # def jump(self, y):
-    #     self.jumping = True
-    #     initialHeight = y
-    #     while y < initialHeight + 10:
-    #         self.y += 5
+
+    def jump(self):
+        self.jumping = True

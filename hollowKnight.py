@@ -5,24 +5,42 @@ from Player import *
 player = Player(50, 50)
 
 def onAppStart(app):
-    pass
+    app.stepsPerSecond = 30
 
 def redrawAll(app):
     drawRect(player.x, player.y, 50, 50, fill = 'black')
 
 def onKeyPress(app, key):
     if key == 'a':
-        player.move(player.x, -1)
+        player.move(-1)
     elif key == 'd':
-        player.move(player.x, +1)
-    # if key == 'o' and player.jumping == False:
-    #     player.jump(player.y)
+        player.move(+1)
+    if key == 'o':
+        player.jump()
 
 def onKeyHold(app, key):
     if 'a' in key:
-        player.move(player.x, -1)
+        player.move(-1)
     elif 'd' in key:
-        player.move(player.x, +1)
+        player.move(+1)
+
+def onStep(app):
+    if player.jumping == True:
+        player.y += 1.5
+        player.positions.append(player.y)
+        if player.y > 30 + player.positions[0]:
+            player.jumping = False
+            player.falling = True 
+            player.positions = []
+    if player.falling == True:
+        player.y -= 1.5
+        player.positions.append(player.y)
+        if player.y + 30 < player.positions[0]:
+            player.jumping = False
+            player.falling = False
+            player.positions = []
+    
+    
 
 def main():
     runApp()
