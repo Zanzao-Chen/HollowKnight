@@ -1,12 +1,15 @@
 class Player:
-    def __init__(self, x, y, level=0): 
+    def __init__(self, x, y, width, height, level=0): 
         self.x = x
         self.y = y
+        self.width = width
+        self.height = height
         self.level = level
         self.jumping = False
         self.positions = []
         self.timer = 0
         self.maxJumpHeight = 10
+
     def move(self, direction):
         self.x += direction
 
@@ -23,3 +26,15 @@ class Player:
                 self.timer = 0
             else:
                 self.y = newPosition
+
+    def getPlayerVertices(self):
+        self.leftX = self.x
+        self.rightX = self.x + self.width
+        self.topY = -self.y
+        self.bottomY = -self.y + self.height
+
+        # topLeft = (self.x, self.y)
+        # topRight = (self.x + self.width, self.y)
+        # bottomLeft = (self.x, self.y + self.height)
+        # bottomRight = (self.x + self.width, self.y + self.height)
+        # return topLeft, topRight, bottomLeft, bottomRight
