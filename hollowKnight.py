@@ -2,13 +2,14 @@ from cmu_graphics import *
 from Player import *
 
 
-player = Player(100, 200)
+player = Player(100, -200)
 
 def onAppStart(app):
     app.stepsPerSecond = 30
 
 def redrawAll(app):
-    drawRect(player.x, player.y, 20, 50, fill = 'black')
+    drawRect(player.x, -player.y, 20, 50, fill = 'black')
+    print(player.y)
 
 def onKeyPress(app, key):
     if key == 'a':

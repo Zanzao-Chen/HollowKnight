@@ -11,11 +11,15 @@ class Player:
         self.x += direction
 
     def jump(self):
-        if self.jumping == True:
-            self.positions.append(self.y)
+        self.positions.append(self.y)
         if self.jumping == True and self.y >= self.positions[0]:
-            self.y = -(self.timer - self.y - (self.maxJumpHeight)**0.5) + self.maxJumpHeight
-        else:
-            self.jumping = False
-            self.positions = []
-            self.timer = 0
+            self.positions.append(self.y)
+            newPosition = -(self.timer - self.y - (self.maxJumpHeight)**0.5) + self.maxJumpHeight
+            if newPosition < self.positions[0]:
+                self.positions.pop()
+                self.jumping = False
+                self.y = self.positions[0]
+                self.positions = []
+                self.timer = 0
+            else:
+                self.y = newPosition
