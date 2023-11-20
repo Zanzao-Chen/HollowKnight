@@ -11,7 +11,7 @@ class Player:
         self.previousPositions = []
         self.timer = 0
         self.maxJumpHeight = 20
-        self.speed = 2
+        self.speed = 3
 
     def move(self, direction):
         self.x += direction*self.speed
