@@ -34,6 +34,9 @@ class Player:
     def fall(self):
         if self.falling == True and self.jumping == False:
             self.y += -self.timer*self.gravity
+        elif self.falling == True and self.jumping == True:
+            self.y += -self.timer*self.gravity/2
+        
 
     def reachMax(self):
         if self.timer*(1+self.gravity) >= (self.maxJumpHeight)**0.5 + self.maxJumpHeight:
@@ -48,12 +51,17 @@ class Player:
         self.middleX = (self.rightX + self.leftX)/2
         self.middleY = (self.topY + self.bottomY)/2
         self.longRadius = self.height/2
-
-        theta =  (self.rotateAngle/180)*math.pi
+        theta =  (self.rotateAngle/180)*math.pi # math.sin and math.cos uses radians, not degrees
         deltaX = (math.sin(theta))*self.longRadius
         deltaY = self.longRadius - (math.cos(theta))*self.longRadius
         self.orientationX = self.middleX - deltaX
         self.orientationY = self.bottomY - deltaY
 
+    def getMiddleXFromOrientation(self, orientationY):
+        self.longRadius = self.height/2
+        theta =  (self.rotateAngle/180)*math.pi # math.sin and math.cos uses radians, not degrees
+        deltaX = (math.sin(theta))*self.longRadius
+        deltaY = self.longRadius - (math.cos(theta))*self.longRadius
+        return orientationY + deltaY
 
        

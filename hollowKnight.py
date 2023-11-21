@@ -81,11 +81,13 @@ def onStep(app):
                 player.jumping = False
                 player.positions = []
                 player.timer = 0
+           
         elif isColliding == True and terrain.type == 'outerOval':
             if direction == 'down':
                 player.getPlayerVertices()
-                getY = terrain.getY(player.middleX)
-                player.y = -(getY - player.height)
+                getY = terrain.getY(player.orientationX)
+                realY = player.getMiddleXFromOrientation(getY)
+                player.y = -(realY - player.height)
                 player.jumping = False
                 player.positions = []
                 player.timer = 0
@@ -123,10 +125,8 @@ def checkCollidingOuterOval(terrain, player):
     else:
         player.getPlayerVertices()
         terrain.getTerrainVertices()
-        if player.middleX > terrain.rightX or player.middleX < terrain.leftX:
-            return False, None, None
-        elif ((player.middleX-terrain.x)/(terrain.width/2))**2 + ((player.bottomY-terrain.y)/(terrain.width/2))**2 < 1:
-            return (True, 'down', player.middleX)
+        if ((player.orientationX-terrain.x)/(terrain.width/2))**2 + ((player.orientationY-terrain.y)/(terrain.height/2))**2 < 1:
+            return (True, 'down', player.orientationX)
         else:
             return False, None, None
 
