@@ -13,8 +13,9 @@ oval1 = Terrain(650, 230, 100, 50, 'outerOval')
 terrainsList = [flat1, flat2, flat3, oval1]
 
 def redrawAll(app):
+    player.getPlayerVertices()
     drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
-    drawCircle(player.x+player.width/2, -player.y + player.height, 3, fill='red')
+    drawCircle(player.orientationX, player.orientationY, 3, fill='red')
     player.previousPositions.append((player.x, -player.y))
     if len(player.previousPositions) > 5:
         player.previousPositions = player.previousPositions[2:]
@@ -33,6 +34,8 @@ def onKeyPress(app, key):
         player.jumping = True
     if key == 'r':
         player.rotateAngle += 10
+    if key == 'l':
+        player.rotateAngle -= 10
      
 
 def onKeyHold(app, key):
