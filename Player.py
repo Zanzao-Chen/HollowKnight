@@ -13,7 +13,7 @@ class Player:
         self.previousPositions = []
         self.timer = 0
         self.maxJumpHeight = 20
-        self.speed = 1
+        self.speed = 3
         self.reachFallPortion = False
         self.gravity = 1.3
         self.rotateAngle = 0

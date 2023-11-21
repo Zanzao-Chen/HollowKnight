@@ -7,7 +7,7 @@ def onAppStart(app):
 
 player = Player(615, -50, 20, 50)
 flat1 = Terrain(0, 250, app.width, 50, 'Rectangle')
-flat2 = Terrain(200, 230, 100, 50, 'Rectangle')
+flat2 = Terrain(200, 230, app.width*2, 50, 'Rectangle')
 flat3 = Terrain(0, 230, 50, 50, 'Rectangle')
 oval1 = Terrain(650, 230, 100, 50, 'outerOval')
 terrainsList = [flat1, flat2, flat3, oval1]
@@ -70,6 +70,7 @@ def onStep(app):
         isColliding = False
         (isColliding, direction, reference) = checkColliding(terrain, player)
         if isColliding == True and terrain.type == 'Rectangle':
+            player.rotateAngle = 0
             if direction == 'right':
                 player.x = reference - player.width
             elif direction == 'left':
@@ -81,6 +82,7 @@ def onStep(app):
                 player.jumping = False
                 player.positions = []
                 player.timer = 0
+
            
         elif isColliding == True and terrain.type == 'outerOval':
             if direction == 'down':
@@ -91,6 +93,7 @@ def onStep(app):
                 player.jumping = False
                 player.positions = []
                 player.timer = 0
+            
                 
 
 def checkColliding(terrain, player):
@@ -127,22 +130,35 @@ def checkCollidingOuterOval(terrain, player):
         player.getPlayerVertices()
         terrain.getTerrainVertices()
         if ((player.orientationX-terrain.x)/(terrain.width/2))**2 + ((player.orientationY-terrain.y)/(terrain.height/2))**2 < 1:
-            getAngle(terrain, player)
+            setAngle(terrain, player)
             player.getPlayerVertices()
             if ((player.orientationX-terrain.x)/(terrain.width/2))**2 + ((player.orientationY-terrain.y)/(terrain.height/2))**2 < 1:
                 return (True, 'down', player.orientationX)    
+            if ((player.middleX-terrain.x)/(terrain.width/2))**2 + ((player.bottomY-terrain.y)/(terrain.height/2))**2 < 1:
+                return (True, 'down', player.orientationX)    
         return False, None, None
         
-def getAngle(terrain, player):
-    print(player.middleX, player.bottomY)
+def setAngle(terrain, player):
     xPartialDerivative =  2*(player.middleX - terrain.x)/((terrain.width/2)**2)
     yPartialDerivative = 2*(player.bottomY-terrain.y)/((terrain.height/2)**2)
-    alpha = math.atan(xPartialDerivative/yPartialDerivative)*180/math.pi
-    if abs(alpha) < 45:
-        player.rotateAngle = -(alpha)
-    elif abs(alpha) >= 45:
-        player.rotateAngle -(90-alpha)
-    print(alpha, player.rotateAngle, xPartialDerivative, yPartialDerivative)
+    if yPartialDerivative == 0:
+        player.rotateAngle = 0
+        return
+    alpha = math.atan(xPartialDerivative/(yPartialDerivative))*180/math.pi
+    if alpha < 45 and alpha >= 0:
+        player.rotateAngle = -alpha
+        print(player.rotateAngle)
+        print(1)
+    elif alpha >= 45:
+        player.rotateAngle = -(90-alpha)
+        print(2)
+        print(player.rotateAngle)
+    elif alpha <= -45:
+        player.rotateAngle = (90+alpha)
+        print(3)
+    elif alpha < 0 and alpha > -45:
+        player.rotateAngle = -alpha
+        print(4)
 def main():
     runApp(width=1000, height=400)
 
