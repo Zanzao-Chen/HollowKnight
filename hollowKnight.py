@@ -13,8 +13,7 @@ oval1 = Terrain(650, 230, 100, 50, 'outerOval')
 terrainsList = [flat1, flat2, flat3, oval1]
 
 def redrawAll(app):
-    print(player.jumping, player.falling)
-    drawRect(player.x, -player.y, player.width, player.height, fill = 'black')
+    drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
     drawCircle(player.x+player.width/2, -player.y + player.height, 3, fill='red')
     player.previousPositions.append((player.x, -player.y))
     if len(player.previousPositions) > 5:
@@ -32,6 +31,8 @@ def onKeyPress(app, key):
         player.move(+1)
     if key == 'o' and player.jumping == False:
         player.jumping = True
+    if key == 'r':
+        player.rotateAngle += 10
      
 
 def onKeyHold(app, key):
@@ -78,27 +79,14 @@ def onStep(app):
                 player.positions = []
                 player.timer = 0
         elif isColliding == True and terrain.type == 'outerOval':
-            if direction == 'right':
+            if direction == 'down':
                 player.getPlayerVertices()
-                getY = terrain.getY((player.rightX+player.leftX)/2)
+                getY = terrain.getY(player.middleX)
                 player.y = -(getY - player.height)
                 player.jumping = False
                 player.positions = []
                 player.timer = 0
-                
-            elif direction == 'above':
-                player.y = terrain.y + terrain.height/2
-                player.jumping = False
-                player.positions = []
-                player.timer = 0
-            elif direction == 'left':
-                getY = terrain.getY((player.rightX+player.leftX)/2)
-                player.y = -(getY - player.height)
-                player.jumping = False
-                player.positions = []
-                player.timer = 0
-        elif isColliding == False and terrain.type == 'outerOval':
-            print('not colliding!')
+
 def checkColliding(terrain, player):
     player.getPlayerVertices()
     if terrain.type == 'Rectangle':
@@ -131,14 +119,11 @@ def checkCollidingOuterOval(terrain, player):
         return False, None, None
     else:
         player.getPlayerVertices()
-        player.middleX = (player.rightX + player.rightX)/2
-        if ((player.middleX-terrain.x)/(terrain.width/2))**2 + ((player.bottomY-terrain.y)/(terrain.width/2))**2 <= 1:
-            if player.middleX < terrain.x:
-                return (True, 'right', terrain)
-            elif player.middleX > terrain.x:
-                return (True, 'left', terrain)
-            elif player.middleX == terrain.x:
-                return (True, 'above', terrain)
+        terrain.getTerrainVertices()
+        if player.middleX > terrain.rightX or player.middleX < terrain.leftX:
+            return False, None, None
+        elif ((player.middleX-terrain.x)/(terrain.width/2))**2 + ((player.bottomY-terrain.y)/(terrain.width/2))**2 < 1:
+            return (True, 'down', player.middleX)
         else:
             return False, None, None
 

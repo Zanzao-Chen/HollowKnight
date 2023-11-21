@@ -1,3 +1,5 @@
+import math
+
 class Player:
     def __init__(self, x, y, width, height, level=0): 
         self.x = x
@@ -14,6 +16,8 @@ class Player:
         self.speed = 3
         self.reachFallPortion = False
         self.gravity = 1.3
+        self.rotateAngle = 0
+        self.theta = 180
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -42,3 +46,15 @@ class Player:
         self.rightX = self.x + self.width
         self.topY = -self.y
         self.bottomY = -self.y + self.height
+        self.middleX = (self.rightX + self.leftX)/2
+        self.middleY = (self.topY + self.bottomY)/2
+        self.longRadius = self.height/2
+        # if self.rotateAngle <= 180:
+        #     theta =  180 - self.rotateAngle
+        #     deltaX = math.sin(theta) * self.longRadius
+        #     deltaY = self.longRadius - (math.cos(theta)*self.longRadius)
+        #     self.orientationX = self.middleX + deltaX
+        #     self.orientationY = self.bottomY - deltaY
+
+
+       
