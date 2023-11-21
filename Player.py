@@ -12,6 +12,8 @@ class Player:
         self.timer = 0
         self.maxJumpHeight = 20
         self.speed = 3
+        self.reachFallPortion = False
+        self.gravity = 1.3
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -19,14 +21,21 @@ class Player:
     def jump(self):
         self.positions.append(self.y)
         if self.jumping == True and self.y >= self.positions[0]:
+            if self.reachMax():
+                self.reachFallPortion = True
+            else:
+                self.reachFallPortion = False
             self.positions.append(self.y)
             newPosition = -(self.timer - self.y - (self.maxJumpHeight)**0.5) + self.maxJumpHeight
             self.y = newPosition
     def fall(self):
         if self.falling == True and self.jumping == False:
-            self.y += -self.timer
-        elif self.falling == True and self.jumping == True:
-            self.y += -self.timer**0.5
+            self.y += -self.timer*self.gravity
+
+    def reachMax(self):
+        if self.timer*(1+self.gravity) >= (self.maxJumpHeight)**0.5 + self.maxJumpHeight:
+            return True
+        return False
 
     def getPlayerVertices(self):
         self.leftX = self.x

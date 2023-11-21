@@ -17,5 +17,4 @@ class Terrain:
         y0 = self.y
         a = self.width/2
         b = self.height/2
-        print(x)
         return -b*((1-((x-x0)/a)**2)**0.5) + y0

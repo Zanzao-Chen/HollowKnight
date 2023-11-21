@@ -13,7 +13,7 @@ oval1 = Terrain(650, 230, 100, 50, 'outerOval')
 terrainsList = [flat1, flat2, flat3, oval1]
 
 def redrawAll(app):
-    
+    print(player.jumping, player.falling)
     drawRect(player.x, -player.y, player.width, player.height, fill = 'black')
     drawCircle(player.x+player.width/2, -player.y + player.height, 3, fill='red')
     player.previousPositions.append((player.x, -player.y))
@@ -82,12 +82,23 @@ def onStep(app):
                 player.getPlayerVertices()
                 getY = terrain.getY((player.rightX+player.leftX)/2)
                 player.y = -(getY - player.height)
+                player.jumping = False
+                player.positions = []
+                player.timer = 0
                 
             elif direction == 'above':
                 player.y = terrain.y + terrain.height/2
+                player.jumping = False
+                player.positions = []
+                player.timer = 0
             elif direction == 'left':
                 getY = terrain.getY((player.rightX+player.leftX)/2)
                 player.y = -(getY - player.height)
+                player.jumping = False
+                player.positions = []
+                player.timer = 0
+        elif isColliding == False and terrain.type == 'outerOval':
+            print('not colliding!')
 def checkColliding(terrain, player):
     player.getPlayerVertices()
     if terrain.type == 'Rectangle':
@@ -116,17 +127,20 @@ def checkCollidingRect(terrain, player):
     return False, None, None
 
 def checkCollidingOuterOval(terrain, player):
-    player.getPlayerVertices()
-    player.middleX = (player.rightX + player.rightX)/2
-    if ((player.middleX-terrain.x)/(terrain.width/2))**2 + ((player.bottomY-terrain.y)/(terrain.width/2))**2 <= 1:
-        if player.middleX < terrain.x:
-            return (True, 'right', terrain)
-        elif player.middleX > terrain.x:
-            return (True, 'left', terrain)
-        elif player.middleX == terrain.x:
-            return (True, 'above', terrain)
-    return False, None, None
-
+    if player.jumping == True and player.reachFallPortion == False:
+        return False, None, None
+    else:
+        player.getPlayerVertices()
+        player.middleX = (player.rightX + player.rightX)/2
+        if ((player.middleX-terrain.x)/(terrain.width/2))**2 + ((player.bottomY-terrain.y)/(terrain.width/2))**2 <= 1:
+            if player.middleX < terrain.x:
+                return (True, 'right', terrain)
+            elif player.middleX > terrain.x:
+                return (True, 'left', terrain)
+            elif player.middleX == terrain.x:
+                return (True, 'above', terrain)
+        else:
+            return False, None, None
 
 def main():
     runApp(width=1000, height=400)
