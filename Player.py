@@ -1,4 +1,5 @@
 import math
+from cmu_graphics import *
 
 class Player:
     def __init__(self, x, y, width, height, level=0): 
@@ -18,6 +19,14 @@ class Player:
         self.gravity = 1.3
         self.rotateAngle = 0
         self.index = 1
+        self.direction = 'right'
+        self.attackWidth = 50
+        self.isAttacking = False
+        self.looksAttacking = False
+        self.previousAttackTime = 0
+        self.attackWidth = self.width
+        self.attackHeight = self.height
+        
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -71,7 +80,14 @@ class Player:
             self.index = 1
         else:
             self.rotateAngle = self.rotateAngle/self.index
-    def setSmoothAngle(self):
-        pass
+    def attack(self):
+        if app.generalCounter - self.previousAttackTime >= 20:
+            print(self.previousAttackTime, app.generalCounter, app.generalCounter - self.previousAttackTime)
+            self.previousAttackTime = app.generalCounter
+            self.attackX = self.x + (self.width if self.direction == 'right' else -self.attackWidth)
+            self.attackY = self.y
+            self.isAttacking = True
+            self.looksAttacking = True
+        
 
                 

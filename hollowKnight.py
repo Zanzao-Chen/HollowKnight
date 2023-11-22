@@ -4,6 +4,10 @@ from Terrain import *
 
 def onAppStart(app):
     app.stepsPerSecond = 30
+    app.generalAttackCounter = 0
+    app.previousAttackTime = 0
+    app.initialAttackCounter = 0
+    app.generalCounter = 0
 
 player = Player(615, -100, 20, 50)
 flat1 = Terrain(0, 250, app.width, 50, 'Rectangle')
@@ -15,6 +19,12 @@ terrainsList = [flat1, flat2, flat3, oval1, oval2]
 
 def redrawAll(app):
     player.getPlayerVertices()
+    print(player.isAttacking, player.looksAttacking)
+    if player.isAttacking == True or player.looksAttacking == True:
+        drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
+        player.isAttacking = False
+
+        
     drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
     drawCircle(player.orientationX, player.orientationY, 3, fill='red')
     player.previousPositions.append((player.x, -player.y))
@@ -28,20 +38,35 @@ def redrawAll(app):
 
 def onKeyPress(app, key):
     if key == 'a':
+        player.direction = 'left'
         player.move(-1)
+        for terrain in terrainsList:
+            (isColliding, direction, reference) = checkColliding(terrain, player)
+            if isColliding == True and terrain.type == 'Rectangle':
+                if direction == 'right':
+                    player.x = reference - player.width
+                elif direction == 'left':
+                    player.x = reference
     elif key == 'd':
+        player.direction = 'right'
         player.move(+1)
+        for terrain in terrainsList:
+            (isColliding, direction, reference) = checkColliding(terrain, player)
+            if isColliding == True and terrain.type == 'Rectangle':
+                if direction == 'right':
+                    player.x = reference - player.width
+                elif direction == 'left':
+                    player.x = reference
     if key == 'o' and player.jumping == False:
         player.jumping = True
-    if key == 'r':
-        player.rotateAngle += 10
-    if key == 'l':
-        player.rotateAngle -= 10
+    if key == 'j':
+        player.attack()
      
 
 def onKeyHold(app, key):
     if 'a' in key:
         player.move(-1)
+        player.direction = 'left'
         for terrain in terrainsList:
             (isColliding, direction, reference) = checkColliding(terrain, player)
             if isColliding == True and terrain.type == 'Rectangle':
@@ -50,6 +75,7 @@ def onKeyHold(app, key):
                 elif direction == 'left':
                     player.x = reference
     elif 'd' in key:
+        player.direction = 'right'
         player.move(+1)
         for terrain in terrainsList:
             (isColliding, direction, reference) = checkColliding(terrain, player)
@@ -58,9 +84,18 @@ def onKeyHold(app, key):
                     player.x = reference - player.width
                 elif direction == 'left':
                     player.x = reference
-        
+    if 'j' in key:
+        player.attack() 
 
 def onStep(app):
+    app.generalCounter += 1
+
+    if player.looksAttacking == True:
+        app.generalAttackCounter += 1
+        if app.generalAttackCounter - app.initialAttackCounter > 10:
+            app.initialAttackCounter = app.generalAttackCounter
+            player.looksAttacking = False
+
     if player.falling == True:
         player.timer += 1
         player.fall()
@@ -72,10 +107,8 @@ def onStep(app):
         (isColliding, direction, reference) = checkColliding(terrain, player)
         if isColliding == True and terrain.type == 'Rectangle':
             if player.rotateAngle != 0:
-                print(player.rotateAngle)
                 player.index += 0.05
                 player.resetAngle()
-                print(player.rotateAngle, player.index)
             if direction == 'right':
                 player.x = reference - player.width
             elif direction == 'left':
@@ -156,6 +189,7 @@ def setAngle(terrain, player):
         player.rotateAngle = (90+alpha)
     elif alpha < 0 and alpha > -45:
         player.rotateAngle = -alpha
+
 def main():
     runApp(width=1000, height=400)
 
