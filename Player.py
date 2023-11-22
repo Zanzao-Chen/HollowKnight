@@ -17,6 +17,7 @@ class Player:
         self.reachFallPortion = False
         self.gravity = 1.3
         self.rotateAngle = 0
+        self.index = 1
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -64,4 +65,13 @@ class Player:
         deltaY = self.longRadius - (math.cos(theta))*self.longRadius
         return orientationY + deltaY
 
-       
+    def resetAngle(self):
+        if self.index >= abs(self.rotateAngle):
+            self.rotateAngle = 0
+            self.index = 1
+        else:
+            self.rotateAngle = self.rotateAngle/self.index
+    def setSmoothAngle(self):
+        pass
+
+                

@@ -5,12 +5,13 @@ from Terrain import *
 def onAppStart(app):
     app.stepsPerSecond = 30
 
-player = Player(615, -50, 20, 50)
+player = Player(615, -100, 20, 50)
 flat1 = Terrain(0, 250, app.width, 50, 'Rectangle')
 flat2 = Terrain(200, 230, app.width*2, 50, 'Rectangle')
 flat3 = Terrain(0, 230, 50, 50, 'Rectangle')
 oval1 = Terrain(650, 230, 100, 50, 'outerOval')
-terrainsList = [flat1, flat2, flat3, oval1]
+oval2 = Terrain(650, 1000, 1000, 1600, 'outerOval')
+terrainsList = [flat1, flat2, flat3, oval1, oval2]
 
 def redrawAll(app):
     player.getPlayerVertices()
@@ -70,7 +71,11 @@ def onStep(app):
         isColliding = False
         (isColliding, direction, reference) = checkColliding(terrain, player)
         if isColliding == True and terrain.type == 'Rectangle':
-            player.rotateAngle = 0
+            if player.rotateAngle != 0:
+                print(player.rotateAngle)
+                player.index += 0.05
+                player.resetAngle()
+                print(player.rotateAngle, player.index)
             if direction == 'right':
                 player.x = reference - player.width
             elif direction == 'left':
@@ -82,8 +87,6 @@ def onStep(app):
                 player.jumping = False
                 player.positions = []
                 player.timer = 0
-
-           
         elif isColliding == True and terrain.type == 'outerOval':
             if direction == 'down':
                 player.getPlayerVertices()
@@ -147,18 +150,12 @@ def setAngle(terrain, player):
     alpha = math.atan(xPartialDerivative/(yPartialDerivative))*180/math.pi
     if alpha < 45 and alpha >= 0:
         player.rotateAngle = -alpha
-        print(player.rotateAngle)
-        print(1)
     elif alpha >= 45:
         player.rotateAngle = -(90-alpha)
-        print(2)
-        print(player.rotateAngle)
     elif alpha <= -45:
         player.rotateAngle = (90+alpha)
-        print(3)
     elif alpha < 0 and alpha > -45:
         player.rotateAngle = -alpha
-        print(4)
 def main():
     runApp(width=1000, height=400)
 
