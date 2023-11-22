@@ -19,12 +19,16 @@ terrainsList = [flat1, flat2, flat3, oval1, oval2]
 
 def redrawAll(app):
     player.getPlayerVertices()
-    print(player.isAttacking, player.looksAttacking)
     if player.isAttacking == True or player.looksAttacking == True:
         drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
         player.isAttacking = False
 
-        
+    for i in range(len(player.healthList)):
+        if player.healthList[i] == True:
+            drawCircle(player.healthX+player.healthXInterval*i, player.healthY, player.healthRadius, fill=player.yesHealthColor)
+        else:
+            drawCircle(player.healthX+player.healthXInterval*i, player.healthY, player.healthRadius, fill=player.noHealthColor)
+    
     drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
     drawCircle(player.orientationX, player.orientationY, 3, fill='red')
     player.previousPositions.append((player.x, -player.y))
@@ -61,6 +65,8 @@ def onKeyPress(app, key):
         player.jumping = True
     if key == 'j':
         player.attack()
+    if key == 'p':
+        player.updateHealth(-1)
      
 
 def onKeyHold(app, key):
@@ -89,10 +95,9 @@ def onKeyHold(app, key):
 
 def onStep(app):
     app.generalCounter += 1
-
     if player.looksAttacking == True:
         app.generalAttackCounter += 1
-        if app.generalAttackCounter - app.initialAttackCounter > 10:
+        if app.generalAttackCounter - app.initialAttackCounter > player.attackAppearDuration:
             app.initialAttackCounter = app.generalAttackCounter
             player.looksAttacking = False
 
@@ -129,7 +134,6 @@ def onStep(app):
                 player.jumping = False
                 player.positions = []
                 player.timer = 0
-            
                 
 
 def checkColliding(terrain, player):

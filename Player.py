@@ -20,6 +20,7 @@ class Player:
         self.rotateAngle = 0
         self.index = 1
         self.direction = 'right'
+        
         self.attackWidth = 50
         self.isAttacking = False
         self.looksAttacking = False
@@ -27,6 +28,17 @@ class Player:
         self.attackWidth = self.width
         self.attackHeight = self.height
         
+        self.maxHealth = 5
+        self.currentHealth = 5
+        self.damageTook = 0
+        self.healthList = [True]*self.maxHealth
+
+        self.healthX = 20 # center of left-most health circle
+        self.healthXInterval = 30
+        self.healthY = 20 
+        self.healthRadius = 10
+        self.yesHealthColor = 'black'
+        self.noHealthColor = 'grey'
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -61,11 +73,12 @@ class Player:
         self.middleX = (self.rightX + self.leftX)/2
         self.middleY = (self.topY + self.bottomY)/2
         self.longRadius = self.height/2
-        theta =  (self.rotateAngle/180)*math.pi # math.sin and math.cos uses radians, not degrees
+        theta =  (self.rotateAngle/180)*math.pi 
         deltaX = (math.sin(theta))*self.longRadius
         deltaY = self.longRadius - (math.cos(theta))*self.longRadius
         self.orientationX = self.middleX - deltaX
         self.orientationY = self.bottomY - deltaY
+        self.attackAppearDuration = 5
 
     def getMiddleXFromOrientation(self, orientationY):
         self.longRadius = self.height/2
@@ -88,6 +101,10 @@ class Player:
             self.attackY = self.y
             self.isAttacking = True
             self.looksAttacking = True
-        
+    
+    def updateHealth(self, amount):
+        self.currentHealth += amount
+        self.damageTook = self.maxHealth - self.currentHealth
+        self.healthList = [True]*self.currentHealth + [False]*self.damageTook
 
                 
