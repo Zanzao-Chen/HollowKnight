@@ -13,6 +13,8 @@ def onAppStart(app):
     app.initialFreezeCounter = 0
     app.generalInvincibleCounter = 0
     app.initialInvincibleCounter = 0
+    app.generalFallingCounter = 0
+    app.initialFallingCounter = 0
 
 player = Player(215, -100, 20, 50)
 flat1 = Terrain(0, 250, app.width, 50, 'Rectangle')
@@ -27,6 +29,8 @@ terrainsList = [flat1, flat2, flat3, oval1, oval2]
 enemyList = [groundEnemy1, groundEnemy2]
 
 def redrawAll(app):
+    drawRect(0, 0, 1000, 400, fill='grey') # super complex eye-saving technology :)
+    print(player.falling)
     player.getPlayerVertices()
     drawEnemies(app)
     drawAttacks(app)
@@ -94,6 +98,8 @@ def onKeyPress(app, key):
                 player.holdingDown = False
             else:
                 player.attack()
+        if key == 'i':
+            player.dash()
 
 def onKeyHold(app, key):
     if player.freezeEverything == False:
@@ -139,8 +145,15 @@ def onStep(app):
 
         if player.stopFreeze == True:
             player.knockBack(player.enemyCollisionDirection)
-            print('yes')
             player.stopFreeze = False
+
+
+        if player.falling == False:
+            app.generalFallingCounter += 1
+            if app.generalFallingCounter - app.initialFallingCounter > player.startFallDuration:
+                app.initialFallingCounter = app.generalFallingCounter
+                print(1)
+                player.falling = True
 
         if player.isInvincible == True:
             app.generalInvincibleCounter += 1

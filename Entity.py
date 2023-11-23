@@ -52,6 +52,7 @@ class Entity:
         self.knockBackX = 100
         self.enemyCollisionDirection = None
         self.collidedEnemy = None
+        self.startFallDuration = 3
 
     def move(self, direction):
         self.x += direction*self.speed
