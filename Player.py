@@ -3,18 +3,25 @@ from cmu_graphics import *
 from Entity import *
 
 class Player(Entity):
-    def attack(self, upwards=False):  
+    def attack(self, upwards=False, downwards=False):  
         self.getPlayerVertices()
         if app.generalCounter - self.previousAttackTime >= self.timeBetweenAttacks:
             self.previousAttackTime = app.generalCounter
             self.attackX = self.x + (self.width if self.direction == 'right' else -self.attackWidth)
             
-            if upwards and self.isCollidingWithOval == False:
+            if upwards == True and self.isCollidingWithOval == False:
                 self.attackY = self.y + self.height
                 self.attackX = self.leftX
-            elif upwards and self.isCollidingWithOval == True:
+            elif upwards == True and self.isCollidingWithOval == True:
                 self.attackY = self.y + self.height + self.deltaY
                 self.attackX = self.leftX + self.deltaX*2 # times 2 because attack is based on self.leftX rather than self.middleX
+                self.attackHeight = self.height + 5
+            elif downwards == True and self.isCollidingWithOval == False:
+                self.attackY = self.y - self.height
+                self.attackX = self.leftX
+            elif downwards == True and self.isCollidingWithOval == True:
+                self.attackY = self.y - self.height + self.deltaY + 5
+                self.attackX = self.leftX - self.deltaX*2 # times 2 because attack is based on self.leftX rather than self.middleX
                 self.attackHeight = self.height + 5
             else:
                 self.attackY = self.y 

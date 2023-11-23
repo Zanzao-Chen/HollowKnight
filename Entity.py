@@ -40,7 +40,18 @@ class Entity:
         self.yesHealthColor = 'black'
         self.noHealthColor = 'grey'
         self.holdingUp = False
+        self.holdingDown = False
         self.isCollidingWithOval = False
+
+        self.freezeDuration = 10
+        self.freezeEverything = False
+        self.stopFreeze = False
+        self.isInvincible = False
+        self.invincibleDuration = 60
+        self.knockBackY = 50
+        self.knockBackX = 100
+        self.enemyCollisionDirection = None
+        self.collidedEnemy = None
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -98,9 +109,26 @@ class Entity:
             self.rotateAngle = self.rotateAngle/self.index
     
     def updateHealth(self, amount):
-        self.currentHealth += amount
-        self.damageTook = self.maxHealth - self.currentHealth
-        self.healthList = [True]*self.currentHealth + [False]*self.damageTook
+        if self.currentHealth >= 1 and amount < 0 and self.isInvincible == False:
+            self.currentHealth += amount
+            self.damageTook = self.maxHealth - self.currentHealth
+            self.healthList = [True]*self.currentHealth + [False]*self.damageTook
+            self.isInvincible = True
+            self.freezeEverything = True
+
+    def knockBack(self, collisionDirection):
+        self.y += self.knockBackY
+        if collisionDirection == 'right':
+            self.x -= self.knockBackX
+        elif collisionDirection == 'left':
+            self.x += self.knockBackX
+        elif collisionDirection in ['up', 'down']:
+            if self.x <= self.collidedEnemy.x:
+                self.x -= self.knockBackX
+            elif self.x > self.collidedEnemy.x:
+                self.x += self.knockBackX
+            
+
 
     def checkColliding(self, terrain):
         self.getPlayerVertices()
@@ -159,5 +187,25 @@ class Entity:
             self.rotateAngle = (90+alpha)
         elif alpha < 0 and alpha > -45:
             self.rotateAngle = -alpha
+    
+    def isCollidingRect(self, other):
+        other.getPlayerVertices()
+        if ((self.leftX >= other.leftX) and (self.leftX <= other.rightX) or
+            (self.rightX >= other.leftX) and (self.rightX <= other.rightX)):
+            if self.bottomY >= other.topY and self.bottomY <= other.bottomY:
+                if len(self.previousPositions) <= 2:
+                    return (True, 'down', other.topY)
+                previousX, previousY = self.previousPositions[-2]
+                if previousY + self.height <= other.topY:
+                    return (True, 'down', other.topY)
+        if ((self.bottomY >= other.topY and self.bottomY <= other.bottomY) or 
+            (self.topY >= other.topY and self.topY <= other.bottomY)):
+            if self.rightX >= other.leftX and self.rightX <= other.rightX:
+                return (True, 'right', other.leftX) 
+        if ((self.bottomY >= other.topY and self.bottomY <= other.bottomY) or 
+            (self.topY >= other.topY and self.topY <= other.bottomY)):
+            if self.leftX <= other.rightX and self.leftX >= other.leftX:
+                return (True, 'left', other.rightX) 
+        return False, None, None
 
                     
