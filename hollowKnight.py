@@ -15,6 +15,8 @@ def onAppStart(app):
     app.initialInvincibleCounter = 0
     app.generalFallingCounter = 0
     app.initialFallingCounter = 0
+    app.generalDashingCounter = 0
+    app.initialDashingCounter = 0
 
 player = Player(215, -100, 20, 50)
 flat1 = Terrain(0, 250, app.width, 50, 'Rectangle')
@@ -30,7 +32,6 @@ enemyList = [groundEnemy1, groundEnemy2]
 
 def redrawAll(app):
     drawRect(0, 0, 1000, 400, fill='grey') # super complex eye-saving technology :)
-    print(player.falling)
     player.getPlayerVertices()
     drawEnemies(app)
     drawAttacks(app)
@@ -47,6 +48,12 @@ def drawHealth(app):
             drawCircle(player.healthX+player.healthXInterval*i, player.healthY, player.healthRadius, fill=player.noHealthColor)
 
 def drawPlayer(app):
+    if player.dashing == True:
+        player.dashingPositions.append((player.x, player.y, player.rotateAngle))
+    elif player.dashing == False:
+        player.dashingPositions = []
+    for (x, y, angle) in player.dashingPositions:
+        drawRect(x, -y, player.width, player.height, fill = 'black', rotateAngle = angle, opacity = 20)
     drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
     drawCircle(player.orientationX, player.orientationY, 3, fill='red')
 
@@ -99,8 +106,8 @@ def onKeyPress(app, key):
             else:
                 player.attack()
         if key == 'i':
-            player.dash()
-
+            player.dashing = True
+            
 def onKeyHold(app, key):
     if player.freezeEverything == False:
         if 'a' in key:
@@ -152,7 +159,6 @@ def onStep(app):
             app.generalFallingCounter += 1
             if app.generalFallingCounter - app.initialFallingCounter > player.startFallDuration:
                 app.initialFallingCounter = app.generalFallingCounter
-                print(1)
                 player.falling = True
 
         if player.isInvincible == True:
@@ -166,6 +172,15 @@ def onStep(app):
             if app.generalAttackCounter - app.initialAttackCounter > player.attackAppearDuration:
                 app.initialAttackCounter = app.generalAttackCounter
                 player.looksAttacking = False
+        
+        if player.dashing == True:
+            app.generalDashingCounter+= 1
+            if app.generalDashingCounter - app.initialDashingCounter > player.dashDuration:
+                app.initialDashingCounter = app.generalDashingCounter
+                player.dashing = False
+
+        if player.dashing == True:
+            player.dash()
 
         for enemy in enemyList:
             if enemy.falling:

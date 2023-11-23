@@ -30,10 +30,12 @@ class Player(Entity):
             self.looksAttacking = True
     def dash(self):
         if self.direction == 'left':
-            self.x -= 100
+            self.x -= self.dashDistance/self.dashDuration
             self.falling = False
             self.jumping = False
+            self.dashing = True
         elif self.direction == 'right':
-            self.x += 100
+            self.x += self.dashDistance/self.dashDuration
             self.falling = False
             self.jumping = False
+            self.dashing = True

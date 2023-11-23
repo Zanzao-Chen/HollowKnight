@@ -38,7 +38,7 @@ class Entity:
         self.healthY = 20 
         self.healthRadius = 10
         self.yesHealthColor = 'black'
-        self.noHealthColor = 'grey'
+        self.noHealthColor = 'white'
         self.holdingUp = False
         self.holdingDown = False
         self.isCollidingWithOval = False
@@ -53,6 +53,12 @@ class Entity:
         self.enemyCollisionDirection = None
         self.collidedEnemy = None
         self.startFallDuration = 3
+
+        self.dashing = False
+        self.dashDuration = 5
+        self.dashDistance = 100
+
+        self.dashingPositions = []
 
     def move(self, direction):
         self.x += direction*self.speed
