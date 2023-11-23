@@ -12,22 +12,27 @@ class Player(Entity):
             if upwards == True and self.isCollidingWithOval == False:
                 self.attackY = self.y + self.height
                 self.attackX = self.leftX
+                self.attackDirection = 'up'
             elif upwards == True and self.isCollidingWithOval == True:
                 self.attackY = self.y + self.height + self.deltaY
                 self.attackX = self.leftX + self.deltaX*2 # times 2 because attack is based on self.leftX rather than self.middleX
                 self.attackHeight = self.height + 5
+                self.attackDirection = 'up'
             elif downwards == True and self.isCollidingWithOval == False:
                 self.attackY = self.y - self.height
                 self.attackX = self.leftX
+                self.attackDirection = 'down'
             elif downwards == True and self.isCollidingWithOval == True:
                 self.attackY = self.y - self.height + self.deltaY + 5
-                self.attackX = self.leftX - self.deltaX*2 # times 2 because attack is based on self.leftX rather than self.middleX
+                self.attackX = self.leftX - self.deltaX*2 
                 self.attackHeight = self.height + 5
+                self.attackDirection = 'down'
             else:
                 self.attackY = self.y 
-            
+                self.attackDirection = self.direction
             self.isAttacking = True
             self.looksAttacking = True
+
     def dash(self):
         if self.direction == 'left':
             self.x -= self.dashDistance/self.dashDuration

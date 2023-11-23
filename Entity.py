@@ -25,7 +25,7 @@ class Entity:
         self.isAttacking = False
         self.looksAttacking = False
         self.previousAttackTime = 0
-        self.attackWidth = self.width
+        self.attackWidth = self.width*5
         self.attackHeight = self.height
         
         self.maxHealth = 5
@@ -57,8 +57,10 @@ class Entity:
         self.dashing = False
         self.dashDuration = 5
         self.dashDistance = 100
+        self.attackDirection = None
 
         self.dashingPositions = []
+        self.test = False
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -163,6 +165,50 @@ class Entity:
             if self.leftX <= terrain.rightX and self.leftX >= terrain.leftX:
                 return (True, 'left', terrain.rightX) 
         return False, None, None
+
+    def rotate_point(self, point, angle):
+        x, y = point
+        rotated_x = x * math.cos(angle) - y * math.sin(angle)
+        rotated_y = x * math.sin(angle) + y * math.cos(angle)
+        return rotated_x, rotated_y
+
+    def checkAttackColliding(self, enemy):
+        topY = -self.attackY
+        leftX = self.attackX
+        bottomY = -(self.attackY - self.height)
+        rightX = self.attackX + self.attackWidth
+        
+        verticesAttackRect = [
+            self.rotate_point((leftX, topY), self.rotateAngle),
+            self.rotate_point((rightX, topY), self.rotateAngle),
+            self.rotate_point((rightX, bottomY), self.rotateAngle),
+            self.rotate_point((leftX, bottomY), self.rotateAngle)
+        ]
+
+        # Define vertices for the enemy rectangle
+        verticesEnemyRect = [
+            self.rotate_point((enemy.leftX, enemy.topY), enemy.rotateAngle),
+            self.rotate_point((enemy.rightX, enemy.topY), enemy.rotateAngle),
+            self.rotate_point((enemy.rightX, enemy.bottomY), enemy.rotateAngle),
+            self.rotate_point((enemy.leftX, enemy.bottomY), enemy.rotateAngle)
+        ]
+
+        # Check for collision using the Separating Axis Theorem
+        for axis in [(1, 0), (0, 1)]:
+            # Project rectangles onto the rotated axis
+            min1 = min(v[0] * axis[0] + v[1] * axis[1] for v in verticesAttackRect)
+            max1 = max(v[0] * axis[0] + v[1] * axis[1] for v in verticesAttackRect)
+            min2 = min(v[0] * axis[0] + v[1] * axis[1] for v in verticesEnemyRect)
+            max2 = max(v[0] * axis[0] + v[1] * axis[1] for v in verticesEnemyRect)
+
+            # Check for overlap on the rotated axis
+            if max1 < min2 or max2 < min1:
+                # Separation on this axis, no collision
+                return False
+
+        # If no separation on any rotated axis, then the rectangles are colliding
+        return True
+
 
     def checkCollidingOuterOval(self, terrain):
         if self.jumping == True and self.reachFallPortion == False:
