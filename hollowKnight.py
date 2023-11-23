@@ -1,6 +1,7 @@
 from cmu_graphics import *
 from Player import *
 from Terrain import *
+from Enemy import *
 
 def onAppStart(app):
     app.stepsPerSecond = 30
@@ -15,9 +16,15 @@ flat2 = Terrain(200, 230, app.width*2, 50, 'Rectangle')
 flat3 = Terrain(0, 230, 50, 50, 'Rectangle')
 oval1 = Terrain(650, 230, 100, 50, 'outerOval')
 oval2 = Terrain(650, 1000, 1000, 1600, 'outerOval')
+groundEnemy1 = GroundEnemy(400, 100, 30, 30, None)
+
 terrainsList = [flat1, flat2, flat3, oval1, oval2]
+enemyList = [groundEnemy1]
 
 def redrawAll(app):
+    for enemy in enemyList:
+        drawRect(enemy.x, -enemy.y, enemy.width, enemy.height)
+
     player.getPlayerVertices()
     if player.isAttacking == True or player.looksAttacking == True:
         drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
@@ -32,6 +39,12 @@ def redrawAll(app):
     drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
     drawCircle(player.orientationX, player.orientationY, 3, fill='red')
     player.previousPositions.append((player.x, -player.y))
+
+    for enemy in enemyList:
+        enemy.previousPositions.append((enemy.x, -enemy.y))
+        if len(enemy.previousPositions) > 5:
+            enemy.previousPositions = enemy.previousPositions[2:]
+
     if len(player.previousPositions) > 5:
         player.previousPositions = player.previousPositions[2:]
     for terrain in terrainsList:
@@ -100,6 +113,62 @@ def onStep(app):
         if app.generalAttackCounter - app.initialAttackCounter > player.attackAppearDuration:
             app.initialAttackCounter = app.generalAttackCounter
             player.looksAttacking = False
+
+    for enemy in enemyList:
+        if enemy.falling == True:
+            enemy.timer += 1
+            enemy.fall()
+
+    for terrain in terrainsList:
+        for enemy in enemyList:
+            isColliding = False
+            (isColliding, direction, reference) = checkColliding(terrain, enemy)
+            if isColliding == True and terrain.type == 'Rectangle' and direction in ['left', 'right']:
+                enemy.direction *= -1
+            if isColliding == True and terrain.type == 'Rectangle':
+                if enemy.rotateAngle != 0:
+                    enemy.index += 0.05
+                    enemy.resetAngle()
+                if direction == 'right':
+                    enemy.x = reference - enemy.width
+                elif direction == 'left':
+                    enemy.x = reference
+                elif direction == 'up':
+                    enemy.y = terrain.bottomY  
+                elif direction == 'down':
+                    enemy.y = -(reference - enemy.height)
+                    enemy.jumping = False
+                    enemy.positions = []
+                    enemy.timer = 0
+                elif isColliding == True and terrain.type == 'outerOval':
+                    if direction == 'down':
+                        enemy.getPlayerVertices()
+                        getY = terrain.getY(enemy.orientationX)
+                        realY = enemy.getMiddleXFromOrientation(getY)
+                        enemy.y = -(realY - enemy.height)
+                        enemy.jumping = False
+                        enemy.positions = []
+                        enemy.timer = 0
+    if enemy.direction == -1:
+        groundEnemy1.move()
+        for terrain in terrainsList:
+            (isColliding, direction, reference) = checkColliding(terrain, player)
+            if isColliding == True and terrain.type == 'Rectangle':
+                if direction == 'right':
+                    player.x = reference - player.width
+                elif direction == 'left':
+                    player.x = reference
+    elif enemy.direction == +1:
+        groundEnemy1.move()
+        for terrain in terrainsList:
+            (isColliding, direction, reference) = checkColliding(terrain, player)
+            if isColliding == True and terrain.type == 'Rectangle':
+                if direction == 'right':
+                    player.x = reference - player.width
+                elif direction == 'left':
+                    player.x = reference
+
+    
 
     if player.falling == True:
         player.timer += 1
