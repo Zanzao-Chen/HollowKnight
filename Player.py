@@ -15,6 +15,7 @@ class Player(Entity):
             elif upwards and self.isCollidingWithOval == True:
                 self.attackY = self.y + self.height + self.deltaY
                 self.attackX = self.leftX + self.deltaX*2 # times 2 because attack is based on self.leftX rather than self.middleX
+                self.attackHeight = self.height + 5
             else:
                 self.attackY = self.y 
             
