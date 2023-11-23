@@ -81,7 +81,11 @@ def onKeyPress(app, key):
     if key == 'o' and player.jumping == False:
         player.jumping = True
     if key == 'j':
-        player.attack()
+        if player.holdingUp == True:
+            player.attack(upwards=True) 
+            player.holdingUp = False
+        else:
+            player.attack()
     if key == 'p':
         player.updateHealth(-1)
      
@@ -97,8 +101,13 @@ def onKeyHold(app, key):
         player.move(+1)
         for terrain in terrainsList:
             implementLeftRightCollisions(player, terrain)
+    if 'w' in key:
+        player.holdingUp = True
     if 'j' in key:
-        player.attack() 
+        if 'w' in key:
+            player.attack(upwards=True) 
+        else:
+            player.attack()
 
 def onStep(app):
     app.generalCounter += 1
@@ -119,6 +128,8 @@ def onStep(app):
             (isColliding, direction, reference) = enemy.checkColliding(terrain)
             if isColliding and terrain.type == 'Rectangle' and direction in ['left', 'right']:
                 enemy.direction *= -1
+            if not isColliding and terrain.type == 'outerOval':
+                enemy.isCollidingWithOval = False
             if isColliding and terrain.type == 'Rectangle':
                 if enemy.rotateAngle != 0:
                     enemy.index += 0.05
@@ -135,6 +146,7 @@ def onStep(app):
                     enemy.positions = []
                     enemy.timer = 0
             elif isColliding and terrain.type == 'outerOval':
+                enemy.isCollidingWithOval = True
                 if direction == 'down':
                     enemy.getPlayerVertices()
                     getY = terrain.getY(enemy.orientationX)
@@ -158,7 +170,9 @@ def onStep(app):
     for terrain in terrainsList:
         isColliding = False
         (isColliding, direction, reference) = player.checkColliding(terrain)
-        if isColliding and terrain.type == 'Rectangle':
+        if not isColliding and terrain.type == 'outerOval':
+            player.isCollidingWithOval = False
+        elif isColliding and terrain.type == 'Rectangle':
             if player.rotateAngle != 0:
                 player.index += 0.05
                 player.resetAngle()
@@ -174,6 +188,7 @@ def onStep(app):
                 player.positions = []
                 player.timer = 0
         elif isColliding and terrain.type == 'outerOval':
+            player.isCollidingWithOval = True
             if direction == 'down':
                 player.getPlayerVertices()
                 getY = terrain.getY(player.orientationX)

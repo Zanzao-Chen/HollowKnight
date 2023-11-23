@@ -39,6 +39,8 @@ class Entity:
         self.healthRadius = 10
         self.yesHealthColor = 'black'
         self.noHealthColor = 'grey'
+        self.holdingUp = False
+        self.isCollidingWithOval = False
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -74,19 +76,19 @@ class Entity:
         self.middleY = (self.topY + self.bottomY)/2
         self.longRadius = self.height/2
         theta =  (self.rotateAngle/180)*math.pi 
-        deltaX = (math.sin(theta))*self.longRadius
-        deltaY = self.longRadius - (math.cos(theta))*self.longRadius
-        self.orientationX = self.middleX - deltaX
-        self.orientationY = self.bottomY - deltaY
+        self.deltaX = (math.sin(theta))*self.longRadius
+        self.deltaY = self.longRadius - (math.cos(theta))*self.longRadius
+        self.orientationX = self.middleX - self.deltaX
+        self.orientationY = self.bottomY - self.deltaY
         self.attackAppearDuration = 2
         self.timeBetweenAttacks = 20
 
     def getMiddleXFromOrientation(self, orientationY):
         self.longRadius = self.height/2
         theta =  (self.rotateAngle/180)*math.pi # math.sin and math.cos uses radians, not degrees
-        deltaX = (math.sin(theta))*self.longRadius
-        deltaY = self.longRadius - (math.cos(theta))*self.longRadius
-        return orientationY + deltaY
+        self.deltaX = (math.sin(theta))*self.longRadius
+        self.deltaY = self.longRadius - (math.cos(theta))*self.longRadius
+        return orientationY + self.deltaY
 
     def resetAngle(self):
         if self.index >= abs(self.rotateAngle):
@@ -143,7 +145,6 @@ class Entity:
             return False, None, None
             
     def setAngle(self, terrain):
-        print('yes')
         xPartialDerivative =  2*(self.middleX - terrain.x)/((terrain.width/2)**2)
         yPartialDerivative = 2*(self.bottomY-terrain.y)/((terrain.height/2)**2)
         if yPartialDerivative == 0:
