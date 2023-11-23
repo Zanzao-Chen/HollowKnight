@@ -78,7 +78,8 @@ class Entity:
         deltaY = self.longRadius - (math.cos(theta))*self.longRadius
         self.orientationX = self.middleX - deltaX
         self.orientationY = self.bottomY - deltaY
-        self.attackAppearDuration = 5
+        self.attackAppearDuration = 2
+        self.timeBetweenAttacks = 20
 
     def getMiddleXFromOrientation(self, orientationY):
         self.longRadius = self.height/2
@@ -142,6 +143,7 @@ class Entity:
             return False, None, None
             
     def setAngle(self, terrain):
+        print('yes')
         xPartialDerivative =  2*(self.middleX - terrain.x)/((terrain.width/2)**2)
         yPartialDerivative = 2*(self.bottomY-terrain.y)/((terrain.height/2)**2)
         if yPartialDerivative == 0:
