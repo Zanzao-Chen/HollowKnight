@@ -58,7 +58,7 @@ def onKeyPress(app, key):
         player.direction = 'left'
         player.move(-1)
         for terrain in terrainsList:
-            (isColliding, direction, reference) = checkColliding(terrain, player)
+            (isColliding, direction, reference) = player.checkColliding(terrain)
             if isColliding == True and terrain.type == 'Rectangle':
                 if direction == 'right':
                     player.x = reference - player.width
@@ -68,7 +68,7 @@ def onKeyPress(app, key):
         player.direction = 'right'
         player.move(+1)
         for terrain in terrainsList:
-            (isColliding, direction, reference) = checkColliding(terrain, player)
+            (isColliding, direction, reference) = player.checkColliding(terrain)
             if isColliding == True and terrain.type == 'Rectangle':
                 if direction == 'right':
                     player.x = reference - player.width
@@ -87,7 +87,7 @@ def onKeyHold(app, key):
         player.move(-1)
         player.direction = 'left'
         for terrain in terrainsList:
-            (isColliding, direction, reference) = checkColliding(terrain, player)
+            (isColliding, direction, reference) = player.checkColliding(terrain)
             if isColliding == True and terrain.type == 'Rectangle':
                 if direction == 'right':
                     player.x = reference - player.width
@@ -97,7 +97,7 @@ def onKeyHold(app, key):
         player.direction = 'right'
         player.move(+1)
         for terrain in terrainsList:
-            (isColliding, direction, reference) = checkColliding(terrain, player)
+            (isColliding, direction, reference) = player.checkColliding(terrain)
             if isColliding == True and terrain.type == 'Rectangle':
                 if direction == 'right':
                     player.x = reference - player.width
@@ -122,7 +122,7 @@ def onStep(app):
     for terrain in terrainsList:
         for enemy in enemyList:
             isColliding = False
-            (isColliding, direction, reference) = checkColliding(terrain, enemy)
+            (isColliding, direction, reference) = enemy.checkColliding(terrain)
             if isColliding == True and terrain.type == 'Rectangle' and direction in ['left', 'right']:
                 enemy.direction *= -1
             if isColliding == True and terrain.type == 'Rectangle':
@@ -152,23 +152,21 @@ def onStep(app):
     if enemy.direction == -1:
         groundEnemy1.move()
         for terrain in terrainsList:
-            (isColliding, direction, reference) = checkColliding(terrain, player)
+            (isColliding, direction, reference) = enemy.checkColliding(terrain)
             if isColliding == True and terrain.type == 'Rectangle':
                 if direction == 'right':
-                    player.x = reference - player.width
+                    enemy.x = reference - enemy.width
                 elif direction == 'left':
-                    player.x = reference
+                    enemy.x = reference
     elif enemy.direction == +1:
         groundEnemy1.move()
         for terrain in terrainsList:
-            (isColliding, direction, reference) = checkColliding(terrain, player)
+            (isColliding, direction, reference) = enemy.checkColliding(terrain)
             if isColliding == True and terrain.type == 'Rectangle':
                 if direction == 'right':
-                    player.x = reference - player.width
+                    enemy.x = reference - enemy.width
                 elif direction == 'left':
-                    player.x = reference
-
-    
+                    enemy.x = reference
 
     if player.falling == True:
         player.timer += 1
@@ -178,7 +176,7 @@ def onStep(app):
         player.jump()
     for terrain in terrainsList:
         isColliding = False
-        (isColliding, direction, reference) = checkColliding(terrain, player)
+        (isColliding, direction, reference) = player.checkColliding(terrain)
         if isColliding == True and terrain.type == 'Rectangle':
             if player.rotateAngle != 0:
                 player.index += 0.05
@@ -203,65 +201,6 @@ def onStep(app):
                 player.jumping = False
                 player.positions = []
                 player.timer = 0
-                
-
-def checkColliding(terrain, player):
-    player.getPlayerVertices()
-    if terrain.type == 'Rectangle':
-        return checkCollidingRect(terrain, player)
-    elif terrain.type == 'outerOval':
-        return checkCollidingOuterOval(terrain, player)
-
-def checkCollidingRect(terrain, player):
-    terrain.getTerrainVertices()
-    if ((player.leftX > terrain.leftX) and (player.leftX < terrain.rightX) or
-        (player.rightX > terrain.leftX) and (player.rightX < terrain.rightX)):
-        if player.bottomY >= terrain.topY and player.bottomY <= terrain.bottomY:
-            if len(player.previousPositions) <= 2:
-                return (True, 'down', terrain.topY)
-            previousX, previousY = player.previousPositions[-2]
-            if previousY + player.height <= terrain.topY:
-                return (True, 'down', terrain.topY)
-    if ((player.bottomY > terrain.topY and player.bottomY < terrain.bottomY) or 
-        (player.topY > terrain.topY and player.topY < terrain.bottomY)):
-        if player.rightX >= terrain.leftX and player.rightX <= terrain.rightX:
-            return (True, 'right', terrain.leftX) 
-    if ((player.bottomY > terrain.topY and player.bottomY < terrain.bottomY) or 
-        (player.topY > terrain.topY and player.topY < terrain.bottomY)):
-        if player.leftX <= terrain.rightX and player.leftX >= terrain.leftX:
-            return (True, 'left', terrain.rightX) 
-    return False, None, None
-
-def checkCollidingOuterOval(terrain, player):
-    if player.jumping == True and player.reachFallPortion == False:
-        return False, None, None
-    else:
-        player.getPlayerVertices()
-        terrain.getTerrainVertices()
-        if ((player.orientationX-terrain.x)/(terrain.width/2))**2 + ((player.orientationY-terrain.y)/(terrain.height/2))**2 < 1:
-            setAngle(terrain, player)
-            player.getPlayerVertices()
-            if ((player.orientationX-terrain.x)/(terrain.width/2))**2 + ((player.orientationY-terrain.y)/(terrain.height/2))**2 < 1:
-                return (True, 'down', player.orientationX)    
-            if ((player.middleX-terrain.x)/(terrain.width/2))**2 + ((player.bottomY-terrain.y)/(terrain.height/2))**2 < 1:
-                return (True, 'down', player.orientationX)    
-        return False, None, None
-        
-def setAngle(terrain, player):
-    xPartialDerivative =  2*(player.middleX - terrain.x)/((terrain.width/2)**2)
-    yPartialDerivative = 2*(player.bottomY-terrain.y)/((terrain.height/2)**2)
-    if yPartialDerivative == 0:
-        player.rotateAngle = 0
-        return
-    alpha = math.atan(xPartialDerivative/(yPartialDerivative))*180/math.pi
-    if alpha < 45 and alpha >= 0:
-        player.rotateAngle = -alpha
-    elif alpha >= 45:
-        player.rotateAngle = -(90-alpha)
-    elif alpha <= -45:
-        player.rotateAngle = (90+alpha)
-    elif alpha < 0 and alpha > -45:
-        player.rotateAngle = -alpha
 
 def main():
     runApp(width=1000, height=400)

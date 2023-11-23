@@ -40,7 +40,6 @@ class Entity:
         self.yesHealthColor = 'black'
         self.noHealthColor = 'grey'
 
-
     def move(self, direction):
         self.x += direction*self.speed
 
@@ -94,18 +93,68 @@ class Entity:
             self.index = 1
         else:
             self.rotateAngle = self.rotateAngle/self.index
-    def attack(self):
-        if app.generalCounter - self.previousAttackTime >= 20:
-            print(self.previousAttackTime, app.generalCounter, app.generalCounter - self.previousAttackTime)
-            self.previousAttackTime = app.generalCounter
-            self.attackX = self.x + (self.width if self.direction == 'right' else -self.attackWidth)
-            self.attackY = self.y
-            self.isAttacking = True
-            self.looksAttacking = True
     
     def updateHealth(self, amount):
         self.currentHealth += amount
         self.damageTook = self.maxHealth - self.currentHealth
         self.healthList = [True]*self.currentHealth + [False]*self.damageTook
 
-                
+    def checkColliding(self, terrain):
+        self.getPlayerVertices()
+        if terrain.type == 'Rectangle':
+            return self.checkCollidingRect(terrain)
+        elif terrain.type == 'outerOval':
+            return self.checkCollidingOuterOval(terrain)
+
+    def checkCollidingRect(self, terrain):
+        terrain.getTerrainVertices()
+        if ((self.leftX > terrain.leftX) and (self.leftX < terrain.rightX) or
+            (self.rightX > terrain.leftX) and (self.rightX < terrain.rightX)):
+            if self.bottomY >= terrain.topY and self.bottomY <= terrain.bottomY:
+                if len(self.previousPositions) <= 2:
+                    return (True, 'down', terrain.topY)
+                previousX, previousY = self.previousPositions[-2]
+                if previousY + self.height <= terrain.topY:
+                    return (True, 'down', terrain.topY)
+        if ((self.bottomY > terrain.topY and self.bottomY < terrain.bottomY) or 
+            (self.topY > terrain.topY and self.topY < terrain.bottomY)):
+            if self.rightX >= terrain.leftX and self.rightX <= terrain.rightX:
+                return (True, 'right', terrain.leftX) 
+        if ((self.bottomY > terrain.topY and self.bottomY < terrain.bottomY) or 
+            (self.topY > terrain.topY and self.topY < terrain.bottomY)):
+            if self.leftX <= terrain.rightX and self.leftX >= terrain.leftX:
+                return (True, 'left', terrain.rightX) 
+        return False, None, None
+
+    def checkCollidingOuterOval(self, terrain):
+        if self.jumping == True and self.reachFallPortion == False:
+            return False, None, None
+        else:
+            self.getPlayerVertices()
+            terrain.getTerrainVertices()
+            if ((self.orientationX-terrain.x)/(terrain.width/2))**2 + ((self.orientationY-terrain.y)/(terrain.height/2))**2 < 1:
+                self.setAngle(terrain)
+                self.getPlayerVertices()
+                if ((self.orientationX-terrain.x)/(terrain.width/2))**2 + ((self.orientationY-terrain.y)/(terrain.height/2))**2 < 1:
+                    return (True, 'down', self.orientationX)    
+                if ((self.middleX-terrain.x)/(terrain.width/2))**2 + ((self.bottomY-terrain.y)/(terrain.height/2))**2 < 1:
+                    return (True, 'down', self.orientationX)    
+            return False, None, None
+            
+    def setAngle(self, terrain):
+        xPartialDerivative =  2*(self.middleX - terrain.x)/((terrain.width/2)**2)
+        yPartialDerivative = 2*(self.bottomY-terrain.y)/((terrain.height/2)**2)
+        if yPartialDerivative == 0:
+            self.rotateAngle = 0
+            return
+        alpha = math.atan(xPartialDerivative/(yPartialDerivative))*180/math.pi
+        if alpha < 45 and alpha >= 0:
+            self.rotateAngle = -alpha
+        elif alpha >= 45:
+            self.rotateAngle = -(90-alpha)
+        elif alpha <= -45:
+            self.rotateAngle = (90+alpha)
+        elif alpha < 0 and alpha > -45:
+            self.rotateAngle = -alpha
+
+                    
