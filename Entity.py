@@ -1,5 +1,7 @@
 import math
 from cmu_graphics import *
+from Vector import *
+
 
 class Entity:
     def __init__(self, x, y, width, height, level=0): 
@@ -25,7 +27,7 @@ class Entity:
         self.isAttacking = False
         self.looksAttacking = False
         self.previousAttackTime = 0
-        self.attackWidth = self.width*5
+        self.attackWidth = self.width
         self.attackHeight = self.height
         
         self.maxHealth = 5
@@ -61,6 +63,9 @@ class Entity:
 
         self.dashingPositions = []
         self.test = False
+
+        self.cornersAttack = []
+        self.cornersEnemy = []
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -166,49 +171,51 @@ class Entity:
                 return (True, 'left', terrain.rightX) 
         return False, None, None
 
-    def rotate_point(self, point, angle):
-        x, y = point
-        rotated_x = x * math.cos(angle) - y * math.sin(angle)
-        rotated_y = x * math.sin(angle) + y * math.cos(angle)
-        return rotated_x, rotated_y
-
     def checkAttackColliding(self, enemy):
         topY = -self.attackY
         leftX = self.attackX
         bottomY = -(self.attackY - self.height)
         rightX = self.attackX + self.attackWidth
+        middleX = (leftX + rightX)/2
+        middleY = (topY + bottomY)/2
+        print(middleX, middleY)
+        attackAngle = self.rotateAngle
+        self.vectorAttackX = Vector(middleX, middleY, attackAngle)
+        self.vectorAttackY = Vector(middleX, middleY, attackAngle+90)
         
-        verticesAttackRect = [
-            self.rotate_point((leftX, topY), self.rotateAngle),
-            self.rotate_point((rightX, topY), self.rotateAngle),
-            self.rotate_point((rightX, bottomY), self.rotateAngle),
-            self.rotate_point((leftX, bottomY), self.rotateAngle)
+        shiftAttackX = (self.attackWidth/2)/(math.cos(attackAngle*math.pi/180)+0.00001)
+        shiftAttackY = (self.attackHeight/2)/(math.sin(attackAngle*math.pi/180)+0.00001)
+        self.vectorAttackRightX = Vector(middleX+shiftAttackX, middleY, attackAngle)
+        self.vectorAttackLeftX = Vector(middleX-shiftAttackX, middleY, attackAngle)
+        self.vectorAttackRightY = Vector(middleX+shiftAttackY, middleY, attackAngle+90)
+        self.vectorAttackLeftY = Vector(middleX-shiftAttackY, middleY, attackAngle+90)
+
+        self.cornersAttack = [
+            (self.vectorAttackLeftX.getIntersection(self.vectorAttackRightY)),
+            (self.vectorAttackLeftX.getIntersection(self.vectorAttackLeftY)),
+            (self.vectorAttackRightX.getIntersection(self.vectorAttackRightY)),
+            (self.vectorAttackRightX.getIntersection(self.vectorAttackLeftY))
         ]
 
-        # Define vertices for the enemy rectangle
-        verticesEnemyRect = [
-            self.rotate_point((enemy.leftX, enemy.topY), enemy.rotateAngle),
-            self.rotate_point((enemy.rightX, enemy.topY), enemy.rotateAngle),
-            self.rotate_point((enemy.rightX, enemy.bottomY), enemy.rotateAngle),
-            self.rotate_point((enemy.leftX, enemy.bottomY), enemy.rotateAngle)
+        enemy.middleX = (enemy.leftX + enemy.rightX)/2
+        enemy.middleY = (enemy.topY + enemy.bottomY)/2
+        self.vectorEnemyX = Vector(enemy.middleX, enemy.middleY, enemy.rotateAngle)
+        self.vectorEnemyY = Vector(enemy.middleX, enemy.middleY, enemy.rotateAngle+90)
+        shiftEnemyX = (enemy.width/2) / (math.cos(enemy.rotateAngle*math.pi/180)+0.00001)
+        shiftEnemyY = (enemy.height/2) / (math.sin(enemy.rotateAngle*math.pi/180)+0.00001)
+
+        self.vectorEnemyRightX = Vector(enemy.middleX + shiftEnemyX, enemy.middleY, enemy.rotateAngle)
+        self.vectorEnemyLeftX = Vector(enemy.middleX - shiftEnemyX, enemy.middleY, enemy.rotateAngle)
+        self.vectorEnemyRightY = Vector(enemy.middleX + shiftEnemyY, enemy.middleY, enemy.rotateAngle + 90)
+        self.vectorEnemyLeftY = Vector(enemy.middleX - shiftEnemyY, enemy.middleY, enemy.rotateAngle + 90)
+
+
+        self.cornersEnemy = [
+            self.vectorEnemyLeftX.getIntersection(self.vectorEnemyRightY),
+            self.vectorEnemyLeftX.getIntersection(self.vectorEnemyLeftY),
+            self.vectorEnemyRightX.getIntersection(self.vectorEnemyRightY),
+            self.vectorEnemyRightX.getIntersection(self.vectorEnemyLeftY)
         ]
-
-        # Check for collision using the Separating Axis Theorem
-        for axis in [(1, 0), (0, 1)]:
-            # Project rectangles onto the rotated axis
-            min1 = min(v[0] * axis[0] + v[1] * axis[1] for v in verticesAttackRect)
-            max1 = max(v[0] * axis[0] + v[1] * axis[1] for v in verticesAttackRect)
-            min2 = min(v[0] * axis[0] + v[1] * axis[1] for v in verticesEnemyRect)
-            max2 = max(v[0] * axis[0] + v[1] * axis[1] for v in verticesEnemyRect)
-
-            # Check for overlap on the rotated axis
-            if max1 < min2 or max2 < min1:
-                # Separation on this axis, no collision
-                return False
-
-        # If no separation on any rotated axis, then the rectangles are colliding
-        return True
-
 
     def checkCollidingOuterOval(self, terrain):
         if self.jumping == True and self.reachFallPortion == False:

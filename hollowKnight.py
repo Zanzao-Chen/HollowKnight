@@ -38,50 +38,39 @@ def redrawAll(app):
 
     drawRect(0, 0, 1000, 400, fill='grey') # super complex eye-saving technology :)
     player.getPlayerVertices()
+    drawTerrain(app)
     drawEnemies(app)
+    if player.test == True and player.isAttacking == True:
+        for vector in [player.vectorAttackLeftX, 
+                    player.vectorAttackRightX, 
+                    player.vectorAttackRightY, 
+                    player.vectorAttackLeftY,
+                    player.vectorEnemyLeftX,
+                    player.vectorEnemyRightX,
+                    player.vectorEnemyLeftY,
+                    player.vectorEnemyRightY]:
+            (x, y, x1, y2) = vector.draw()
+            drawLine(x, y, x1, y2)
+        (x, y, x1, y2) = player.vectorAttackX.draw()
+        drawLine(x, y, x1, y2, fill = 'blue')
+        (x, y, x1, y2) = player.vectorAttackY.draw()
+        drawLine(x, y, x1, y2, fill = 'green')
+        (x, y, x1, y2) = player.vectorEnemyX.draw()
+        drawLine(x, y, x1, y2, fill = 'red')
+        (x, y, x1, y2) = player.vectorEnemyY.draw()
+        drawLine(x, y, x1, y2, fill = 'pink')
+    if player.test == True and player.isAttacking == True:
+        for (x, y) in player.cornersAttack:
+            drawCircle(x, y, 2)
+        for (x, y) in player.cornersEnemy:
+            drawCircle(x, y, 2)
+    
+
+
     drawAttacks(app)
     drawHealth(app)
     drawPlayer(app)
     recordPreviousPositions(app)
-    drawTerrain(app)
-    if player.test == True:
-        for enemy in enemyList:
-            topY = player.attackY
-            leftX = player.attackX
-            bottomY = player.attackY - player.height
-            rightX = player.attackX + player.attackWidth
-            verticesAttackRect = [
-                player.rotate_point((leftX, topY), player.rotateAngle),
-                player.rotate_point((rightX, topY), player.rotateAngle),
-                player.rotate_point((rightX, bottomY), player.rotateAngle),
-                player.rotate_point((leftX, bottomY), player.rotateAngle)
-            ]
-
-            verticesEnemyRect = [
-                player.rotate_point((enemy.leftX, enemy.topY), enemy.rotateAngle),
-                player.rotate_point((enemy.rightX, enemy.topY), enemy.rotateAngle),
-                player.rotate_point((enemy.rightX, enemy.bottomY), enemy.rotateAngle),
-                player.rotate_point((enemy.leftX, enemy.bottomY), enemy.rotateAngle)
-            ]
-            for (x, y) in verticesAttackRect:
-                drawCircle(x, y, 1)
-            for (x, y) in verticesEnemyRect:
-                drawCircle(x, y, 1)
-    # if player.test == True:
-    #     drawCircle(groundEnemyVertical1.leftX, groundEnemyVertical1.topY, 1)
-    #     drawCircle(groundEnemyVertical1.rightX, groundEnemyVertical1.topY, 1)
-    #     drawCircle(groundEnemyVertical1.leftX, groundEnemyVertical1.bottomY, 1)
-    #     drawCircle(groundEnemyVertical1.rightX, groundEnemyVertical1.bottomY, 1)
-    #     topY = player.attackY
-    #     leftX = player.attackX
-    #     bottomY = player.attackY - player.height
-    #     rightX = player.attackX + player.attackWidth
-    #     drawCircle(leftX, -topY, 1)
-    #     drawCircle(rightX, -topY, 1)
-    #     drawCircle(leftX, -bottomY, 1)
-    #     drawCircle(rightX, -bottomY, 1)
-        
-        
 
 def drawHealth(app):
     for i in range(len(player.healthList)):
@@ -154,7 +143,7 @@ def onKeyPress(app, key):
         if key == 'i':
             player.dashing = True
         if key == 'p':
-            app.stepsPerSecond = 1
+            app.stepsPerSecond = 0.01
         if key == 'space':
             player.test = True
             
