@@ -26,58 +26,43 @@ oval1 = Terrain(650, 230, 100, 50, 'outerOval')
 oval2 = Terrain(650, 1000, 1000, 1600, 'outerOval')
 
 
-groundEnemy1 = GroundEnemy(400, 100, 30, 30, None)
-groundEnemy2 = GroundEnemy(800, 100, 30, 30, None)
-groundEnemyVertical1 = GroundEnemyVertical(600, 100, 30, 30, None)
+groundEnemy1 = GroundEnemy(400, 100, 30, 30, 50, None)
+groundEnemy2 = GroundEnemy(800, 100, 30, 30, 50, None)
+groundEnemyVertical1 = GroundEnemyVertical(600, 100, 30, 30, 50, None)
 
 terrainsList = [flat1, flat2, flat3, oval1, oval2]
 enemyList = [groundEnemy1, groundEnemy2, groundEnemyVertical1]
 
 def redrawAll(app):
-    groundEnemyVertical1.getPlayerVertices()
-
     drawRect(0, 0, 1000, 400, fill='grey') # super complex eye-saving technology :)
+    
+    groundEnemyVertical1.getPlayerVertices()
     player.getPlayerVertices()
+    
     drawTerrain(app)
     drawEnemies(app)
-    if player.test == True and player.isAttacking == True:
-    #     for vector in [player.vectorAttackLeftX, 
-    #                 player.vectorAttackRightX, 
-    #                 player.vectorAttackRightY, 
-    #                 player.vectorAttackLeftY,
-    #                 player.vectorEnemyLeftX,
-    #                 player.vectorEnemyRightX,
-    #                 player.vectorEnemyLeftY,
-    #                 player.vectorEnemyRightY]:
-    #         (x, y, x1, y2) = vector.draw()
-    #         drawLine(x, y, x1, y2)
-        (x, y, x1, y2) = player.vectorAttackX.draw()
-        drawLine(x, y, x1, y2, fill = 'green')
-        (x, y, x1, y2) = player.vectorAttackY.draw()
-        drawLine(x, y, x1, y2, fill = 'green')
-        (x, y, x1, y2) = player.vectorEnemyX.draw()
-        drawLine(x, y, x1, y2, fill = 'green')
-        (x, y, x1, y2) = player.vectorEnemyY.draw()
-        drawLine(x, y, x1, y2, fill = 'green')
-    
+    # drawTestVectors(app)
+    # drawTestVertices(app)
     
     drawHealth(app)
     drawPlayer(app)
     recordPreviousPositions(app)
     drawAttacks(app)
+
+def drawTestVertices(app):
     if player.test == True and player.isAttacking == True:
-        # for (x, y) in player.cornersAttack:
-        #     drawCircle(x, y, 2)
-        # for (x, y) in player.cornersEnemy:
-        #     drawCircle(x, y, 2)
-        # for (x, y) in player.fourPointsAttack1:
-        #     drawCircle(x, y, 2, fill='white')
-        # for (x, y) in player.fourPointsAttack2:
-        #     drawCircle(x, y, 2, fill='white')
-        # for (x, y) in player.fourPointsEnemy1:
-        #     drawCircle(x, y, 2, fill = 'white')
-        # for (x, y) in player.fourPointsEnemy2:
-        #     drawCircle(x, y, 2, fill = 'white')
+        for (x, y) in player.cornersAttack:
+            drawCircle(x, y, 2)
+        for (x, y) in player.cornersEnemy:
+            drawCircle(x, y, 2)
+        for (x, y) in player.fourPointsAttack1:
+            drawCircle(x, y, 2, fill='white')
+        for (x, y) in player.fourPointsAttack2:
+            drawCircle(x, y, 2, fill='white')
+        for (x, y) in player.fourPointsEnemy1:
+            drawCircle(x, y, 2, fill = 'white')
+        for (x, y) in player.fourPointsEnemy2:
+            drawCircle(x, y, 2, fill = 'white')
         for (x, y) in player.twoPointsAttack1:
             drawCircle(x, y, 2, fill='blue')
         for (x, y) in player.twoPointsAttack2:
@@ -86,6 +71,27 @@ def redrawAll(app):
             drawCircle(x, y, 2, fill = 'blue')
         for (x, y) in player.twoPointsEnemy2:
             drawCircle(x, y, 2, fill = 'blue')
+
+def drawTestVectors(app):
+    if player.test == True and player.isAttacking == True:
+        for vector in [player.vectorAttackLeftX, 
+                    player.vectorAttackRightX, 
+                    player.vectorAttackRightY, 
+                    player.vectorAttackLeftY,
+                    player.vectorEnemyLeftX,
+                    player.vectorEnemyRightX,
+                    player.vectorEnemyLeftY,
+                    player.vectorEnemyRightY]:
+            (x, y, x1, y2) = vector.draw()
+            drawLine(x, y, x1, y2)
+        (x, y, x1, y2) = player.vectorAttackX.draw()
+        drawLine(x, y, x1, y2, fill = 'green')
+        (x, y, x1, y2) = player.vectorAttackY.draw()
+        drawLine(x, y, x1, y2, fill = 'green')
+        (x, y, x1, y2) = player.vectorEnemyX.draw()
+        drawLine(x, y, x1, y2, fill = 'green')
+        (x, y, x1, y2) = player.vectorEnemyY.draw()
+        drawLine(x, y, x1, y2, fill = 'green')
 
 def drawHealth(app):
     for i in range(len(player.healthList)):
@@ -127,7 +133,8 @@ def drawAttacks(app):
 
 def drawEnemies(app):
     for enemy in enemyList:
-        drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, rotateAngle = enemy.rotateAngle)
+        if enemy.isKilled == False:
+            drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, rotateAngle = enemy.rotateAngle)
 
 def onKeyPress(app, key):
     if player.freezeEverything == False:
@@ -153,8 +160,8 @@ def onKeyPress(app, key):
             else:
                 player.attack()
             for enemy in enemyList:
-                if player.isAttacking == True:
-                    print(player.checkAttackColliding(enemy), enemy)
+                if player.isAttacking == True and player.checkAttackColliding(enemy) == True:
+                    enemy.takeDamageEnemy(player.playerAttackDamage)
         if key == 'i':
             player.dashing = True
         if key == 'p':

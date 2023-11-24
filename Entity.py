@@ -27,7 +27,7 @@ class Entity:
         self.isAttacking = False
         self.looksAttacking = False
         self.previousAttackTime = 0
-        self.attackWidth = self.width
+        self.attackWidth = self.width*5
         self.attackHeight = self.height
         
         self.maxHealth = 5
@@ -44,6 +44,7 @@ class Entity:
         self.holdingUp = False
         self.holdingDown = False
         self.isCollidingWithOval = False
+        self.isKilled = False
 
         self.freezeDuration = 10
         self.freezeEverything = False
@@ -55,6 +56,7 @@ class Entity:
         self.enemyCollisionDirection = None
         self.collidedEnemy = None
         self.startFallDuration = 3
+        self.playerAttackDamage = 25
 
         self.dashing = False
         self.dashDuration = 5
@@ -134,13 +136,16 @@ class Entity:
         else:
             self.rotateAngle = self.rotateAngle/self.index
     
-    def updateHealth(self, amount):
-        if self.currentHealth >= 1 and amount < 0 and self.isInvincible == False:
+    def updateHealth(self, amount): # for player
+        if self.currentHealth == -amount:
+            self.isKilled = True
+        elif self.currentHealth >= 1 and amount < 0 and self.isInvincible == False:
             self.currentHealth += amount
             self.damageTook = self.maxHealth - self.currentHealth
             self.healthList = [True]*self.currentHealth + [False]*self.damageTook
             self.isInvincible = True
             self.freezeEverything = True
+        
 
     def knockBack(self, collisionDirection):
         self.y += self.knockBackY
@@ -314,8 +319,6 @@ class Entity:
             (endX2 <= x0 and endX2 >= x1) or (endX2 >= x0 and endX2 <= x1)):
             self.projectionCollisions += 1
 
-        print(self.projectionCollisions)
-
         if self.projectionCollisions == 4:
             self.projectionCollisions = 0
             return True
@@ -375,5 +378,10 @@ class Entity:
             if self.leftX <= other.rightX and self.leftX >= other.leftX:
                 return (True, 'left', other.rightX) 
         return False, None, None
-
+    
+    def takeDamageEnemy(self, damage):
+        actualDamage = min(self.health, damage)
+        self.health -= damage
+        if self.health == 0:
+            self.isKilled = True
                     

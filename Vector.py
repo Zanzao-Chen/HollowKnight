@@ -57,6 +57,7 @@ class Vector:
     def draw(self):
         return self.initialX-1000, self.initialY-(1000*self.gradient), self.initialX+1000, self.initialY+(1000*self.gradient)
 
+# test cases
 # vectorTest = Vector(1, 1+3**0.5, 30)
 # print(vectorTest.gradient, vectorTest.intercept) # sqrt3, 1
 # print(vectorTest.getY(2)) # 4.46

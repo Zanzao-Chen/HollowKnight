@@ -8,7 +8,6 @@ class Player(Entity):
         if app.generalCounter - self.previousAttackTime >= self.timeBetweenAttacks:
             self.previousAttackTime = app.generalCounter
             self.attackX = self.x + (self.width if self.direction == 'right' else -self.attackWidth)
-            
             if upwards == True and self.isCollidingWithOval == False:
                 self.attackY = self.y + self.height
                 self.attackX = self.leftX
