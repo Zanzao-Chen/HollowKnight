@@ -266,27 +266,7 @@ class Entity:
         referencePointAttack1X2 = ((x1+x3)/2, (y1+y3)/2)
         referencePointAttack2X1 = ((x0+x1)/2, (y0+y1)/2)
         referencePointAttack2X2 = ((x2+x3)/2, (y2+y3)/2)
-        
-        [(endX1, endY1), (endX2, endY2)] = self.twoPointsAttack1
-        x0, y0 = referencePointAttack1X1[0], referencePointAttack1X1[1]
-        x1, y1 = referencePointAttack1X2[0], referencePointAttack1X2[1]
-        if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
-            (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
-            (endX1 <= x0 and endX2 >= x0) or (endX1 >= x0 and endX2 <= x0) or
-            (endX1 <= x1 and endX2 >= x1) or (endX1 >= x1 and endX2 <= x1)):
-            self.projectionCollisions += 1
-            print(1)
-        
-        [(endX1, endY1), (endX2, endY2)] = self.twoPointsAttack2
-        x0, y0 = referencePointAttack2X1[0], referencePointAttack2X1[1]
-        x1, y1 = referencePointAttack2X2[0], referencePointAttack2X2[1]
-        if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
-            (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
-            (endX1 <= x0 and endX2 >= x0) or (endX1 >= x0 and endX2 <= x0) or
-            (endX1 <= x1 and endX2 >= x1) or (endX1 >= x1 and endX2 <= x1)):
-            self.projectionCollisions += 1
-            print(2)
-        
+
         (x0, y0) = self.cornersEnemy[0]
         (x1, y1) = self.cornersEnemy[1]
         (x2, y2) = self.cornersEnemy[2]
@@ -296,25 +276,43 @@ class Entity:
         referencePointEnemy2X1 = ((x0+x1)/2, (y0+y1)/2)
         referencePointEnemy2X2 = ((x2+x3)/2, (y2+y3)/2)
         
+        
         [(endX1, endY1), (endX2, endY2)] = self.twoPointsEnemy1
+        x0, y0 = referencePointAttack1X1[0], referencePointAttack1X1[1]
+        x1, y1 = referencePointAttack1X2[0], referencePointAttack1X2[1]
+        if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
+            (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
+            (endX1 <= x0 and endX1 >= x1) or (endX1 >= x0 and endX1 <= x1) or
+            (endX2 <= x0 and endX2 >= x1) or (endX2 >= x0 and endX2 <= x1)):
+            self.projectionCollisions += 1
+
+        [(endX1, endY1), (endX2, endY2)] = self.twoPointsEnemy2
+        x0, y0 = referencePointAttack2X1[0], referencePointAttack2X1[1]
+        x1, y1 = referencePointAttack2X2[0], referencePointAttack2X2[1]
+        if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
+            (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
+            (endX1 <= x0 and endX1 >= x1) or (endX1 >= x0 and endX1 <= x1) or
+            (endX2 <= x0 and endX2 >= x1) or (endX2 >= x0 and endX2 <= x1)):
+            self.projectionCollisions += 1
+        
+        
+        [(endX1, endY1), (endX2, endY2)] = self.twoPointsAttack1
         x0, y0 = referencePointEnemy1X1[0], referencePointEnemy1X1[1]
         x1, y1 = referencePointEnemy1X2[0], referencePointEnemy1X2[1]
         if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
             (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
-            (endX1 <= x0 and endX2 >= x0) or (endX1 >= x0 and endX2 <= x0) or
-            (endX1 <= x1 and endX2 >= x1) or (endX1 >= x1 and endX2 <= x1)):
+            (endX1 <= x0 and endX1 >= x1) or (endX1 >= x0 and endX1 <= x1) or
+            (endX2 <= x0 and endX2 >= x1) or (endX2 >= x0 and endX2 <= x1)):
             self.projectionCollisions += 1
-            print(3)
         
-        [(endX1, endY1), (endX2, endY2)] = self.twoPointsEnemy2
+        [(endX1, endY1), (endX2, endY2)] = self.twoPointsAttack2
         x0, y0 = referencePointEnemy2X1[0], referencePointEnemy2X1[1]
         x1, y1 = referencePointEnemy2X2[0], referencePointEnemy2X2[1]
         if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
             (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
-            (endX1 <= x0 and endX2 >= x0) or (endX1 >= x0 and endX2 <= x0) or
-            (endX1 <= x1 and endX2 >= x1) or (endX1 >= x1 and endX2 <= x1)):
+            (endX1 <= x0 and endX1 >= x1) or (endX1 >= x0 and endX1 <= x1) or
+            (endX2 <= x0 and endX2 >= x1) or (endX2 >= x0 and endX2 <= x1)):
             self.projectionCollisions += 1
-            print(4)
 
         print(self.projectionCollisions)
 

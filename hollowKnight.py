@@ -123,7 +123,7 @@ def drawTerrain(app):
 def drawAttacks(app):
     if player.isAttacking == True or player.looksAttacking == True:
         drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
-        # player.isAttacking = False
+        player.isAttacking = False
 
 def drawEnemies(app):
     for enemy in enemyList:
