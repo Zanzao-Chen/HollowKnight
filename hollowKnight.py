@@ -40,7 +40,7 @@ def redrawAll(app):
     player.getPlayerVertices()
     drawTerrain(app)
     drawEnemies(app)
-    # if player.test == True and player.isAttacking == True:
+    if player.test == True and player.isAttacking == True:
     #     for vector in [player.vectorAttackLeftX, 
     #                 player.vectorAttackRightX, 
     #                 player.vectorAttackRightY, 
@@ -51,24 +51,30 @@ def redrawAll(app):
     #                 player.vectorEnemyRightY]:
     #         (x, y, x1, y2) = vector.draw()
     #         drawLine(x, y, x1, y2)
-    #     (x, y, x1, y2) = player.vectorAttackX.draw()
-    #     drawLine(x, y, x1, y2, fill = 'blue')
-    #     (x, y, x1, y2) = player.vectorAttackY.draw()
-    #     drawLine(x, y, x1, y2, fill = 'green')
-    #     (x, y, x1, y2) = player.vectorEnemyX.draw()
-    #     drawLine(x, y, x1, y2, fill = 'red')
-    #     (x, y, x1, y2) = player.vectorEnemyY.draw()
-    #     drawLine(x, y, x1, y2, fill = 'pink')
-    if player.test == True and player.isAttacking == True:
-        print(player.cornersAttack, player.cornersEnemy)
-        for (x, y) in player.cornersAttack:
-            drawCircle(x, y, 2)
-        for (x, y) in player.cornersEnemy:
-            drawCircle(x, y, 2)
-    drawAttacks(app)
+        (x, y, x1, y2) = player.vectorAttackX.draw()
+        drawLine(x, y, x1, y2, fill = 'blue')
+        (x, y, x1, y2) = player.vectorAttackY.draw()
+        drawLine(x, y, x1, y2, fill = 'green')
+        (x, y, x1, y2) = player.vectorEnemyX.draw()
+        drawLine(x, y, x1, y2, fill = 'red')
+        (x, y, x1, y2) = player.vectorEnemyY.draw()
+        drawLine(x, y, x1, y2, fill = 'pink')
+    
+    
     drawHealth(app)
     drawPlayer(app)
     recordPreviousPositions(app)
+    if player.test == True and player.isAttacking == True:
+        # for (x, y) in player.cornersAttack:
+        #     drawCircle(x, y, 2)
+        # for (x, y) in player.cornersEnemy:
+        #     drawCircle(x, y, 2)
+        for (x, y) in player.projectedEnemy:
+            drawCircle(x, y, 2, fill='purple')
+        for (x, y) in player.projectedAttack:
+            drawCircle(x, y, 2, fill = 'white')
+        print("New Start!", player.vectorAttackX, player.vectorAttackY, player.projectedEnemy)
+    drawAttacks(app)
 
 def drawHealth(app):
     for i in range(len(player.healthList)):

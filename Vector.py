@@ -29,12 +29,16 @@ class Vector:
             horizontal = 'right'
         return (horizontal, vertical)
     def getProjection(self, x, y):
-        distance = self.getDistancePoint(self, x, y)
-        deltaX = math.sin(self.angleY-90)*distance
-        deltaY = math.cos(self.angleY-90)*distance
+        distance = self.getDistancePoint(x, y)
         horizontal, vertical = self.getRelativePositionOfPoint(x, y)
         if horizontal == 'on':
             return (x, y)
+        if self.angleY >= 0:
+            deltaX = math.sin((-self.angleY+90)*math.pi/180)*distance
+            deltaY = math.cos((-self.angleY+90)*math.pi/180)*distance
+        elif self.angleY < 0:
+            deltaX = math.sin((self.angleY+90)*math.pi/180)*distance
+            deltaY = math.cos((self.angleY+90)*math.pi/180)*distance
         if horizontal == 'left':
             newX = x + deltaX
         elif horizontal == 'right':
@@ -46,10 +50,8 @@ class Vector:
         return(newX, newY)
     
     def getIntersection(self, other):
-        
         x = (other.intercept-self.intercept)/(self.gradient-other.gradient)
         y = self.gradient*x + self.intercept
-        print(self, other, x, y)
         return (x, y)
 
     def draw(self):

@@ -66,6 +66,8 @@ class Entity:
 
         self.cornersAttack = []
         self.cornersEnemy = []
+        self.projectedAttack = []
+        self.projectedEnemy = []
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -172,6 +174,10 @@ class Entity:
         return False, None, None
 
     def checkAttackColliding(self, enemy):
+        self.cornersAttack = []
+        self.cornersEnemy = []
+        self.projectedEnemy = []
+        self.projectedAttack = []
         topY = -self.attackY
         leftX = self.attackX
         bottomY = -(self.attackY - self.height)
@@ -215,6 +221,16 @@ class Entity:
             self.vectorEnemyRightX.getIntersection(self.vectorEnemyRightY),
             self.vectorEnemyRightX.getIntersection(self.vectorEnemyLeftY)
         ]
+
+        for vector in [self.vectorEnemyX, 
+                    self.vectorEnemyY]:
+            for (x, y) in self.cornersAttack:
+                self.projectedAttack.append(vector.getProjection(x, y))
+        
+        for vector in [self.vectorAttackX, 
+                    self.vectorAttackY]:
+            for (x, y) in self.cornersEnemy:
+                self.projectedEnemy.append(vector.getProjection(x, y))
 
     def checkCollidingOuterOval(self, terrain):
         if self.jumping == True and self.reachFallPortion == False:
