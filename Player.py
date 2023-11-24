@@ -43,3 +43,15 @@ class Player(Entity):
             self.falling = False
             self.jumping = False
             self.dashing = True
+
+    def attackKnockBack(self, enemy):
+        if self.attackDirection == 'left':
+            self.x += self.playerAttackKnockBackDistanceHorizontal
+            enemy.x -= enemy.enemyAttackKnockBackDistanceHorizontal
+        elif self.attackDirection == 'right':
+            self.x -= self.playerAttackKnockBackDistanceHorizontal
+            enemy.x += enemy.enemyAttackKnockBackDistanceHorizontal
+        elif self.attackDirection == 'up':
+            enemy.y += enemy.enemyKnockBackDistanceVertical
+        # elif self.attackDirection == 'down':
+        #     self.jumping = True

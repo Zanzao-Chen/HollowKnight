@@ -162,7 +162,7 @@ def onKeyPress(app, key):
             for enemy in enemyList:
                 if player.isAttacking == True and player.checkAttackColliding(enemy) == True:
                     enemy.takeDamageEnemy(player.playerAttackDamage)
-                    print(player.attackDirection)
+                    player.attackKnockBack(enemy)
         if key == 'i':
             player.dashing = True
         if key == 'p':
@@ -196,7 +196,7 @@ def onKeyHold(app, key):
             for enemy in enemyList:
                 if player.isAttacking == True and player.checkAttackColliding(enemy) == True:
                     enemy.takeDamageEnemy(player.playerAttackDamage)
-                    print(player.attackDirection)
+                    player.attackKnockBack(enemy)
 
 def onKeyRelease(app, key):
     if key == 'w':

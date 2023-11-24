@@ -56,7 +56,7 @@ class Entity:
         self.enemyCollisionDirection = None
         self.collidedEnemy = None
         self.startFallDuration = 3
-        self.playerAttackDamage = 50
+        self.playerAttackDamage = 10
 
         self.dashing = False
         self.dashDuration = 5
@@ -83,6 +83,10 @@ class Entity:
         self.infinity = 10*15
         self.epsilon = 10*-15
 
+        self.playerAttackKnockBackDistanceHorizontal = 50
+        self.enemyAttackKnockBackDistanceHorizontal = 100
+        self.enemyKnockBackDistanceVertical = 100
+
     def move(self, direction):
         self.x += direction*self.speed
 
@@ -96,6 +100,7 @@ class Entity:
             self.positions.append(self.y)
             newPosition = -(self.timer - self.y - (self.maxJumpHeight)**0.5) + self.maxJumpHeight
             self.y = newPosition
+
     def fall(self):
         if self.falling == True and self.jumping == False:
             self.y += -self.timer*self.gravity
