@@ -28,7 +28,7 @@ oval2 = Terrain(650, 1000, 1000, 1600, 'outerOval')
 
 groundEnemy1 = GroundEnemy(400, 100, 30, 30, 50, None)
 groundEnemy2 = GroundEnemy(800, 100, 30, 30, 50, None)
-groundEnemyVertical1 = GroundEnemyVertical(600, 100, 30, 30, 50, None)
+groundEnemyVertical1 = GroundEnemyVertical(600, 100, 30, 30, 500, None)
 
 terrainsList = [flat1, flat2, flat3, oval1, oval2]
 enemyList = [groundEnemy1, groundEnemy2, groundEnemyVertical1]
@@ -148,7 +148,7 @@ def onKeyPress(app, key):
             player.move(+1)
             for terrain in terrainsList:
                 implementLeftRightCollisions(player, terrain)
-        if key == 'o' and player.jumping == False:
+        if key == 'o' and (player.jumping == False and player.isPogoing == False):
             player.jumping = True
         if key == 'j':
             if player.holdingUp == True:
@@ -301,10 +301,14 @@ def onStep(app):
 
         if player.falling:
             player.timer += 1
+            # player.timerPogo += 1
             player.fall()
         if player.jumping:
             player.timer += 1
             player.jump()
+        if player.isPogoing:
+            player.timerPogo += 1
+            player.pogoJump()
         for terrain in terrainsList:
             isColliding = False
             (isColliding, direction, reference) = player.checkColliding(terrain)
@@ -323,8 +327,10 @@ def onStep(app):
                 elif direction == 'down':
                     player.y = -(reference - player.height)
                     player.jumping = False
+                    player.isPogoing = False
                     player.positions = []
                     player.timer = 0
+                    player.timerPogo = 0
             elif isColliding and terrain.type == 'outerOval':
                 player.isCollidingWithOval = True
                 if direction == 'down':
@@ -333,8 +339,11 @@ def onStep(app):
                     realY = player.getMiddleXFromOrientation(getY)
                     player.y = -(realY - player.height)
                     player.jumping = False
+                    player.isPogoing = False
                     player.positions = []
                     player.timer = 0
+                    player.timerPogo = 0
+
 
 def implementLeftRightCollisions(object, terrain):
     (isColliding, direction, reference) = object.checkColliding(terrain)

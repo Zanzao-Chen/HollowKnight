@@ -37,11 +37,13 @@ class Player(Entity):
             self.x -= self.dashDistance/self.dashDuration
             self.falling = False
             self.jumping = False
+            self.isPogoing = False
             self.dashing = True
         elif self.direction == 'right':
             self.x += self.dashDistance/self.dashDuration
             self.falling = False
             self.jumping = False
+            self.isPogoing = False
             self.dashing = True
 
     def attackKnockBack(self, enemy):
@@ -53,5 +55,5 @@ class Player(Entity):
             enemy.x += enemy.enemyAttackKnockBackDistanceHorizontal
         elif self.attackDirection == 'up':
             enemy.y += enemy.enemyKnockBackDistanceVertical
-        # elif self.attackDirection == 'down':
-        #     self.jumping = True
+        elif self.attackDirection == 'down':
+            self.isPogoing = True

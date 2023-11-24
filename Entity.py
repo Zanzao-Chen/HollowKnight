@@ -87,6 +87,10 @@ class Entity:
         self.enemyAttackKnockBackDistanceHorizontal = 100
         self.enemyKnockBackDistanceVertical = 100
 
+        self.isPogoing = False
+        self.timerPogo = 0
+        self.positionsPogo = []
+
     def move(self, direction):
         self.x += direction*self.speed
 
@@ -101,10 +105,17 @@ class Entity:
             newPosition = -(self.timer - self.y - (self.maxJumpHeight)**0.5) + self.maxJumpHeight
             self.y = newPosition
 
+    def pogoJump(self):
+        print(self.isPogoing, self.jumping)
+        if self.isPogoing == True:
+            self.jumping = False
+            newPosition = -(self.timerPogo - self.y - (self.maxJumpHeight*1.2)**0.5) + self.maxJumpHeight*1.2
+            self.y = newPosition
+
     def fall(self):
-        if self.falling == True and self.jumping == False:
+        if self.falling == True and self.jumping == False and self.isPogoing == False:
             self.y += -self.timer*self.gravity
-        elif self.falling == True and self.jumping == True:
+        elif self.falling == True and (self.jumping == True or self.isPogoing == True):
             self.y += -self.timer*self.gravity/2
         
 
@@ -348,7 +359,7 @@ class Entity:
         
 
     def checkCollidingOuterOval(self, terrain):
-        if self.jumping == True and self.reachFallPortion == False:
+        if (self.jumping == True or self.isPogoing == True) and self.reachFallPortion == False:
             return False, None, None
         else:
             self.getPlayerVertices()
