@@ -4,7 +4,7 @@ class Vector:
     def __init__(self, x, y, angle):
         self.initialX = x
         self.initialY = y
-        self.angleY = angle
+        self.angleY = -angle
         self.angleX = 90-self.angleY
         self.gradient = (math.tan(self.angleX*math.pi/180))
         self.intercept = self.initialY - self.initialX*self.gradient
@@ -46,12 +46,14 @@ class Vector:
         return(newX, newY)
     
     def getIntersection(self, other):
-        x = (other.intercept+self.intercept)/(self.gradient - other.gradient)
+        
+        x = (other.intercept-self.intercept)/(self.gradient-other.gradient)
         y = self.gradient*x + self.intercept
+        print(self, other, x, y)
         return (x, y)
 
     def draw(self):
-        return self.initialX-1000, self.initialY+(1000*self.gradient), self.initialX+1000, self.initialY-(1000*self.gradient)
+        return self.initialX-1000, self.initialY-(1000*self.gradient), self.initialX+1000, self.initialY+(1000*self.gradient)
 
 # vectorTest = Vector(1, 1+3**0.5, 30)
 # print(vectorTest.gradient, vectorTest.intercept) # sqrt3, 1

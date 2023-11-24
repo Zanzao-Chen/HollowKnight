@@ -40,33 +40,31 @@ def redrawAll(app):
     player.getPlayerVertices()
     drawTerrain(app)
     drawEnemies(app)
+    # if player.test == True and player.isAttacking == True:
+    #     for vector in [player.vectorAttackLeftX, 
+    #                 player.vectorAttackRightX, 
+    #                 player.vectorAttackRightY, 
+    #                 player.vectorAttackLeftY,
+    #                 player.vectorEnemyLeftX,
+    #                 player.vectorEnemyRightX,
+    #                 player.vectorEnemyLeftY,
+    #                 player.vectorEnemyRightY]:
+    #         (x, y, x1, y2) = vector.draw()
+    #         drawLine(x, y, x1, y2)
+    #     (x, y, x1, y2) = player.vectorAttackX.draw()
+    #     drawLine(x, y, x1, y2, fill = 'blue')
+    #     (x, y, x1, y2) = player.vectorAttackY.draw()
+    #     drawLine(x, y, x1, y2, fill = 'green')
+    #     (x, y, x1, y2) = player.vectorEnemyX.draw()
+    #     drawLine(x, y, x1, y2, fill = 'red')
+    #     (x, y, x1, y2) = player.vectorEnemyY.draw()
+    #     drawLine(x, y, x1, y2, fill = 'pink')
     if player.test == True and player.isAttacking == True:
-        for vector in [player.vectorAttackLeftX, 
-                    player.vectorAttackRightX, 
-                    player.vectorAttackRightY, 
-                    player.vectorAttackLeftY,
-                    player.vectorEnemyLeftX,
-                    player.vectorEnemyRightX,
-                    player.vectorEnemyLeftY,
-                    player.vectorEnemyRightY]:
-            (x, y, x1, y2) = vector.draw()
-            drawLine(x, y, x1, y2)
-        (x, y, x1, y2) = player.vectorAttackX.draw()
-        drawLine(x, y, x1, y2, fill = 'blue')
-        (x, y, x1, y2) = player.vectorAttackY.draw()
-        drawLine(x, y, x1, y2, fill = 'green')
-        (x, y, x1, y2) = player.vectorEnemyX.draw()
-        drawLine(x, y, x1, y2, fill = 'red')
-        (x, y, x1, y2) = player.vectorEnemyY.draw()
-        drawLine(x, y, x1, y2, fill = 'pink')
-    if player.test == True and player.isAttacking == True:
+        print(player.cornersAttack, player.cornersEnemy)
         for (x, y) in player.cornersAttack:
             drawCircle(x, y, 2)
         for (x, y) in player.cornersEnemy:
             drawCircle(x, y, 2)
-    
-
-
     drawAttacks(app)
     drawHealth(app)
     drawPlayer(app)

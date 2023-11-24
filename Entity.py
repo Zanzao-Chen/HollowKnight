@@ -178,7 +178,6 @@ class Entity:
         rightX = self.attackX + self.attackWidth
         middleX = (leftX + rightX)/2
         middleY = (topY + bottomY)/2
-        print(middleX, middleY)
         attackAngle = self.rotateAngle
         self.vectorAttackX = Vector(middleX, middleY, attackAngle)
         self.vectorAttackY = Vector(middleX, middleY, attackAngle+90)
