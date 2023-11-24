@@ -19,7 +19,7 @@ class Vector:
     def getDistancePoint(self, x, y):
         return abs(self.gradient*x-y+self.intercept)/(1+self.gradient**2)**0.5
     def getRelativePositionOfPoint(self, x, y):
-        if self.getY(x) == y and self.getX(y) == x:
+        if self.getY(x) == y or self.getX(y) == x:
             return ('on', 'on')
         if self.getY(x) < y:
             vertical = 'down'

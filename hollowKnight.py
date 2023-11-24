@@ -162,13 +162,14 @@ def onKeyPress(app, key):
             for enemy in enemyList:
                 if player.isAttacking == True and player.checkAttackColliding(enemy) == True:
                     enemy.takeDamageEnemy(player.playerAttackDamage)
+                    print(player.attackDirection)
         if key == 'i':
             player.dashing = True
         if key == 'p':
             app.stepsPerSecond = 0.01
         if key == 'space':
             player.test = True
-            
+
 def onKeyHold(app, key):
     if player.freezeEverything == False:
         if 'a' in key:
@@ -192,7 +193,16 @@ def onKeyHold(app, key):
                 player.attack(downwards=True)
             else:
                 player.attack()
-            
+            for enemy in enemyList:
+                if player.isAttacking == True and player.checkAttackColliding(enemy) == True:
+                    enemy.takeDamageEnemy(player.playerAttackDamage)
+                    print(player.attackDirection)
+
+def onKeyRelease(app, key):
+    if key == 'w':
+        player.holdingUp = False
+    elif key == 's':
+        player.holdingDown = False
 
 def onStep(app):
     if player.freezeEverything == True:
