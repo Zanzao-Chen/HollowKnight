@@ -8,6 +8,8 @@ class Vector:
         self.angleX = 90-self.angleY
         self.gradient = (math.tan(self.angleX*math.pi/180))
         self.intercept = self.initialY - self.initialX*self.gradient
+        self.infinity = 10*15
+        self.epsilon = 10*-15
     def __repr__(self):
         return f"Vector x: {self.initialX}, y:{self.initialY}, angle: {self.angleY}, gradient = {self.gradient}, intercept = {self.intercept}"
     def getX(self, y):
@@ -55,6 +57,10 @@ class Vector:
         return (x, y)
 
     def draw(self):
+        if abs(self.gradient) >= self.infinity:
+            return self.initialX, self.initialY + 1000, self.initialX, self.initialY - 1000
+        elif abs(self.gradient) <= self.epsilon:
+            return self.initialX+1000, self.initialY, self.initialX- 1000, self.initialY 
         return self.initialX-1000, self.initialY-(1000*self.gradient), self.initialX+1000, self.initialY+(1000*self.gradient)
 
 # test cases

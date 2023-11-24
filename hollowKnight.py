@@ -42,12 +42,11 @@ def redrawAll(app):
     drawTerrain(app)
     drawEnemies(app)
     # drawTestVectors(app)
-    # drawTestVertices(app)
-    
     drawHealth(app)
     drawPlayer(app)
     recordPreviousPositions(app)
     drawAttacks(app)
+    # drawTestVertices(app)
 
 def drawTestVertices(app):
     if player.test == True and player.isAttacking == True:
@@ -135,7 +134,8 @@ def drawEnemies(app):
     for enemy in enemyList:
         if enemy.isKilled == False:
             drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, rotateAngle = enemy.rotateAngle)
-
+        else:
+            enemyList.remove(enemy)
 def onKeyPress(app, key):
     if player.freezeEverything == False:
         if key == 'a':
@@ -285,8 +285,9 @@ def onStep(app):
 
         for enemy in enemyList:
             enemy.move()
-        for terrain in terrainsList:
-            implementLeftRightCollisions(enemy, terrain)
+        for enemy in enemyList:
+            for terrain in terrainsList:
+                implementLeftRightCollisions(enemy, terrain)
 
         if player.falling:
             player.timer += 1

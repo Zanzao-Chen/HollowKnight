@@ -56,7 +56,7 @@ class Entity:
         self.enemyCollisionDirection = None
         self.collidedEnemy = None
         self.startFallDuration = 3
-        self.playerAttackDamage = 25
+        self.playerAttackDamage = 50
 
         self.dashing = False
         self.dashDuration = 5
@@ -80,6 +80,8 @@ class Entity:
         self.twoPointsEnemy2 = []
 
         self.projectionCollisions = 0
+        self.infinity = 10*15
+        self.epsilon = 10*-15
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -208,19 +210,31 @@ class Entity:
         self.vectorAttackX = Vector(middleX, middleY, attackAngle)
         self.vectorAttackY = Vector(middleX, middleY, attackAngle+90)
         
-        shiftAttackX = (self.attackWidth/2)/(math.cos(attackAngle*math.pi/180)+0.00001)
-        shiftAttackY = (self.attackHeight/2)/(math.sin(attackAngle*math.pi/180)+0.00001)
-        self.vectorAttackRightX = Vector(middleX+shiftAttackX, middleY, attackAngle)
-        self.vectorAttackLeftX = Vector(middleX-shiftAttackX, middleY, attackAngle)
-        self.vectorAttackRightY = Vector(middleX+shiftAttackY, middleY, attackAngle+90)
-        self.vectorAttackLeftY = Vector(middleX-shiftAttackY, middleY, attackAngle+90)
+        if self.rotateAngle == 0:
+            shiftAttackX = self.attackWidth/2
+            shiftAttackY = self.attackHeight/2
+            self.vectorAttackRightX = Vector(middleX+shiftAttackX, middleY, attackAngle)
+            self.vectorAttackLeftX = Vector(middleX-shiftAttackX, middleY, attackAngle)
+            self.vectorAttackRightY = Vector(middleX+shiftAttackY, middleY, attackAngle+90)
+            self.vectorAttackLeftY = Vector(middleX-shiftAttackY, middleY, attackAngle+90)
+            self.cornersAttack=[(self.attackX, -self.attackY),
+                                (self.attackX, -self.attackY+self.attackHeight),
+                                (self.attackX+self.attackWidth, -self.attackY),
+                                (self.attackX+self.attackWidth, -self.attackY+self.attackHeight)]
+        else:
+            shiftAttackX = (self.attackWidth/2)/(math.cos(attackAngle*math.pi/180)+0.00001)
+            shiftAttackY = (self.attackHeight/2)/(math.sin(attackAngle*math.pi/180)+0.00001)
+            self.vectorAttackRightX = Vector(middleX+shiftAttackX, middleY, attackAngle)
+            self.vectorAttackLeftX = Vector(middleX-shiftAttackX, middleY, attackAngle)
+            self.vectorAttackRightY = Vector(middleX+shiftAttackY, middleY, attackAngle+90)
+            self.vectorAttackLeftY = Vector(middleX-shiftAttackY, middleY, attackAngle+90)
 
-        self.cornersAttack = [
-            (self.vectorAttackLeftX.getIntersection(self.vectorAttackRightY)),
-            (self.vectorAttackLeftX.getIntersection(self.vectorAttackLeftY)),
-            (self.vectorAttackRightX.getIntersection(self.vectorAttackRightY)),
-            (self.vectorAttackRightX.getIntersection(self.vectorAttackLeftY))
-        ]
+            self.cornersAttack = [
+                (self.vectorAttackLeftX.getIntersection(self.vectorAttackRightY)),
+                (self.vectorAttackLeftX.getIntersection(self.vectorAttackLeftY)),
+                (self.vectorAttackRightX.getIntersection(self.vectorAttackRightY)),
+                (self.vectorAttackRightX.getIntersection(self.vectorAttackLeftY))
+            ]
 
         enemy.middleX = (enemy.leftX + enemy.rightX)/2
         enemy.middleY = (enemy.topY + enemy.bottomY)/2
@@ -318,7 +332,7 @@ class Entity:
             (endX1 <= x0 and endX1 >= x1) or (endX1 >= x0 and endX1 <= x1) or
             (endX2 <= x0 and endX2 >= x1) or (endX2 >= x0 and endX2 <= x1)):
             self.projectionCollisions += 1
-
+        
         if self.projectionCollisions == 4:
             self.projectionCollisions = 0
             return True
@@ -326,7 +340,7 @@ class Entity:
             self.projectionCollisions = 0
             return False
         
-
+        
 
     def checkCollidingOuterOval(self, terrain):
         if self.jumping == True and self.reachFallPortion == False:
@@ -384,4 +398,5 @@ class Entity:
         self.health -= damage
         if self.health == 0:
             self.isKilled = True
+
                     
