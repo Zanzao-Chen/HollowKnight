@@ -6,6 +6,8 @@ class GroundEnemy(Entity):
         self.direction = -1
     def move(self):
         self.x += self.direction*self.speed
+    def __repr__(self):
+        return 'groundEnemy'
 
 class GroundEnemyVertical(Entity):
     def __init__(self, x, y, width, height, level=0):
@@ -13,3 +15,5 @@ class GroundEnemyVertical(Entity):
         self.direction = 0
     def move(self):
         self.x += self.direction*self.speed
+    def __repr__(self):
+        return 'groundEnemyVertical'

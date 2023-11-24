@@ -68,6 +68,16 @@ class Entity:
         self.cornersEnemy = []
         self.projectedAttack = []
         self.projectedEnemy = []
+        self.fourPointsAttack1 = []
+        self.fourPointsAttack2 = []
+        self.fourPointsEnemy1 = []
+        self.fourPointsEnemy2 = []
+        self.twoPointsAttack1 = []
+        self.twoPointsAttack2 = []
+        self.twoPointsEnemy1 = []
+        self.twoPointsEnemy2 = []
+
+        self.projectionCollisions = 0
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -178,6 +188,11 @@ class Entity:
         self.cornersEnemy = []
         self.projectedEnemy = []
         self.projectedAttack = []
+        self.fourPointsAttack1 = []
+        self.fourPointsAttack2 = []
+        self.fourPointsEnemy1 = []
+        self.fourPointsEnemy2 = []
+
         topY = -self.attackY
         leftX = self.attackX
         bottomY = -(self.attackY - self.height)
@@ -231,6 +246,86 @@ class Entity:
                     self.vectorAttackY]:
             for (x, y) in self.cornersEnemy:
                 self.projectedEnemy.append(vector.getProjection(x, y))
+
+        self.fourPointsAttack1 = self.projectedAttack[:4]
+        self.fourPointsAttack2 = self.projectedAttack[4:]
+        self.fourPointsEnemy1 = self.projectedEnemy[:4]
+        self.fourPointsEnemy2 = self.projectedEnemy[4:]
+
+        self.twoPointsAttack1 = [max(self.fourPointsAttack1), min(self.fourPointsAttack1)]
+        self.twoPointsAttack2 = [max(self.fourPointsAttack2), min(self.fourPointsAttack2)]
+        self.twoPointsEnemy1 = [max(self.fourPointsEnemy1), min(self.fourPointsEnemy1)]
+        self.twoPointsEnemy2 = [max(self.fourPointsEnemy2), min(self.fourPointsEnemy2)]
+
+        # 0 top left, 1 bottom left, 2 top right, 3 bottom right
+        (x0, y0) = self.cornersAttack[0]
+        (x1, y1) = self.cornersAttack[1]
+        (x2, y2) = self.cornersAttack[2]
+        (x3, y3) = self.cornersAttack[3]
+        referencePointAttack1X1 = ((x0+x2)/2, (y0+y2)/2)
+        referencePointAttack1X2 = ((x1+x3)/2, (y1+y3)/2)
+        referencePointAttack2X1 = ((x0+x1)/2, (y0+y1)/2)
+        referencePointAttack2X2 = ((x2+x3)/2, (y2+y3)/2)
+        
+        [(endX1, endY1), (endX2, endY2)] = self.twoPointsAttack1
+        x0, y0 = referencePointAttack1X1[0], referencePointAttack1X1[1]
+        x1, y1 = referencePointAttack1X2[0], referencePointAttack1X2[1]
+        if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
+            (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
+            (endX1 <= x0 and endX2 >= x0) or (endX1 >= x0 and endX2 <= x0) or
+            (endX1 <= x1 and endX2 >= x1) or (endX1 >= x1 and endX2 <= x1)):
+            self.projectionCollisions += 1
+            print(1)
+        
+        [(endX1, endY1), (endX2, endY2)] = self.twoPointsAttack2
+        x0, y0 = referencePointAttack2X1[0], referencePointAttack2X1[1]
+        x1, y1 = referencePointAttack2X2[0], referencePointAttack2X2[1]
+        if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
+            (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
+            (endX1 <= x0 and endX2 >= x0) or (endX1 >= x0 and endX2 <= x0) or
+            (endX1 <= x1 and endX2 >= x1) or (endX1 >= x1 and endX2 <= x1)):
+            self.projectionCollisions += 1
+            print(2)
+        
+        (x0, y0) = self.cornersEnemy[0]
+        (x1, y1) = self.cornersEnemy[1]
+        (x2, y2) = self.cornersEnemy[2]
+        (x3, y3) = self.cornersEnemy[3]
+        referencePointEnemy1X1 = ((x0+x2)/2, (y0+y2)/2)
+        referencePointEnemy1X2 = ((x1+x3)/2, (y1+y3)/2)
+        referencePointEnemy2X1 = ((x0+x1)/2, (y0+y1)/2)
+        referencePointEnemy2X2 = ((x2+x3)/2, (y2+y3)/2)
+        
+        [(endX1, endY1), (endX2, endY2)] = self.twoPointsEnemy1
+        x0, y0 = referencePointEnemy1X1[0], referencePointEnemy1X1[1]
+        x1, y1 = referencePointEnemy1X2[0], referencePointEnemy1X2[1]
+        if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
+            (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
+            (endX1 <= x0 and endX2 >= x0) or (endX1 >= x0 and endX2 <= x0) or
+            (endX1 <= x1 and endX2 >= x1) or (endX1 >= x1 and endX2 <= x1)):
+            self.projectionCollisions += 1
+            print(3)
+        
+        [(endX1, endY1), (endX2, endY2)] = self.twoPointsEnemy2
+        x0, y0 = referencePointEnemy2X1[0], referencePointEnemy2X1[1]
+        x1, y1 = referencePointEnemy2X2[0], referencePointEnemy2X2[1]
+        if ((x0 <= endX1 and x0 >= endX2) or (x0 >= endX1 and x0 <= endX2) or
+            (x1 <= endX1 and x1 >= endX2) or (x1 >= endX1 and x1 <= endX2) or 
+            (endX1 <= x0 and endX2 >= x0) or (endX1 >= x0 and endX2 <= x0) or
+            (endX1 <= x1 and endX2 >= x1) or (endX1 >= x1 and endX2 <= x1)):
+            self.projectionCollisions += 1
+            print(4)
+
+        print(self.projectionCollisions)
+
+        if self.projectionCollisions == 4:
+            self.projectionCollisions = 0
+            return True
+        else:
+            self.projectionCollisions = 0
+            return False
+        
+
 
     def checkCollidingOuterOval(self, terrain):
         if self.jumping == True and self.reachFallPortion == False:
