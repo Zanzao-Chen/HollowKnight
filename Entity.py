@@ -23,7 +23,6 @@ class Entity:
         self.index = 1
         self.direction = 'right'
         
-        self.attackWidth = 50
         self.isAttacking = False
         self.looksAttacking = False
         self.previousAttackTime = 0
@@ -256,21 +255,31 @@ class Entity:
         enemy.middleY = (enemy.topY + enemy.bottomY)/2
         self.vectorEnemyX = Vector(enemy.middleX, enemy.middleY, enemy.rotateAngle)
         self.vectorEnemyY = Vector(enemy.middleX, enemy.middleY, enemy.rotateAngle+90)
-        shiftEnemyX = (enemy.width/2) / (math.cos(enemy.rotateAngle*math.pi/180)+0.00001)
-        shiftEnemyY = (enemy.height/2) / (math.sin(enemy.rotateAngle*math.pi/180)+0.00001)
 
-        self.vectorEnemyRightX = Vector(enemy.middleX + shiftEnemyX, enemy.middleY, enemy.rotateAngle)
-        self.vectorEnemyLeftX = Vector(enemy.middleX - shiftEnemyX, enemy.middleY, enemy.rotateAngle)
-        self.vectorEnemyRightY = Vector(enemy.middleX + shiftEnemyY, enemy.middleY, enemy.rotateAngle + 90)
-        self.vectorEnemyLeftY = Vector(enemy.middleX - shiftEnemyY, enemy.middleY, enemy.rotateAngle + 90)
-
-
-        self.cornersEnemy = [
-            self.vectorEnemyLeftX.getIntersection(self.vectorEnemyRightY),
-            self.vectorEnemyLeftX.getIntersection(self.vectorEnemyLeftY),
-            self.vectorEnemyRightX.getIntersection(self.vectorEnemyRightY),
-            self.vectorEnemyRightX.getIntersection(self.vectorEnemyLeftY)
-        ]
+        if enemy.rotateAngle == 0:
+            shiftEnemyX = enemy.width/2
+            shiftEnemyY = enemy.height/2
+            self.vectorEnemyRightX = Vector(enemy.middleX + shiftEnemyX, enemy.middleY, enemy.rotateAngle)
+            self.vectorEnemyLeftX = Vector(enemy.middleX - shiftEnemyX, enemy.middleY, enemy.rotateAngle)
+            self.vectorEnemyRightY = Vector(enemy.middleX + shiftEnemyY, enemy.middleY, enemy.rotateAngle + 90)
+            self.vectorEnemyLeftY = Vector(enemy.middleX - shiftEnemyY, enemy.middleY, enemy.rotateAngle + 90)
+            self.cornersEnemy=[(enemy.x, -enemy.y),
+                                (enemy.x, -enemy.y+enemy.height),
+                                (enemy.x+enemy.width, -enemy.y),
+                                (enemy.x+enemy.width, -enemy.y+enemy.height)]
+        else:
+            shiftEnemyX = (enemy.width/2) / (math.cos(enemy.rotateAngle*math.pi/180)+0.00001)
+            shiftEnemyY = (enemy.height/2) / (math.sin(enemy.rotateAngle*math.pi/180)+0.00001)
+            self.vectorEnemyRightX = Vector(enemy.middleX + shiftEnemyX, enemy.middleY, enemy.rotateAngle)
+            self.vectorEnemyLeftX = Vector(enemy.middleX - shiftEnemyX, enemy.middleY, enemy.rotateAngle)
+            self.vectorEnemyRightY = Vector(enemy.middleX + shiftEnemyY, enemy.middleY, enemy.rotateAngle + 90)
+            self.vectorEnemyLeftY = Vector(enemy.middleX - shiftEnemyY, enemy.middleY, enemy.rotateAngle + 90)
+            self.cornersEnemy = [
+                self.vectorEnemyLeftX.getIntersection(self.vectorEnemyRightY),
+                self.vectorEnemyLeftX.getIntersection(self.vectorEnemyLeftY),
+                self.vectorEnemyRightX.getIntersection(self.vectorEnemyRightY),
+                self.vectorEnemyRightX.getIntersection(self.vectorEnemyLeftY)
+            ]
 
         for vector in [self.vectorEnemyX, 
                     self.vectorEnemyY]:

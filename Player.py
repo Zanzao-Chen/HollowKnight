@@ -9,10 +9,19 @@ class Player(Entity):
             self.previousAttackTime = app.generalCounter
             self.attackX = self.x + (self.width if self.direction == 'right' else -self.attackWidth)
             if downwards == False and upwards == False:
+                self.attackWidth = self.width*5
+                self.attackHeight = self.height
                 self.attackY = self.y 
                 self.attackDirection = self.direction
-            elif upwards == True and self.isCollidingWithOval == False:
-                self.attackY = self.y + self.height
+                self.isAttacking = True
+                self.looksAttacking = True
+                return
+            self.attackWidth = self.width*5
+            self.attackHeight = self.height
+            if upwards == True and self.isCollidingWithOval == False:
+                self.attackWidth = self.width
+                self.attackHeight = self.height*2
+                self.attackY = self.y + self.attackHeight
                 self.attackX = self.leftX - (self.attackWidth - self.width)/2
                 self.attackDirection = 'up'
             elif upwards == True and self.isCollidingWithOval == True:
@@ -21,10 +30,12 @@ class Player(Entity):
                 self.attackHeight = self.height + 5
                 self.attackDirection = 'up'
             elif downwards == True and self.isCollidingWithOval == False:
+                self.attackWidth = self.width
+                self.attackHeight = self.height*2
                 self.attackY = self.y - self.height
                 self.attackX = self.leftX - (self.attackWidth - self.width)/2
-                self.attackDirection = 'down'
             elif downwards == True and self.isCollidingWithOval == True:
+                self.attackWidth = self.width*5
                 self.attackY = self.y - self.height + self.deltaY + 5
                 self.attackX = self.leftX - self.deltaX*2 - (self.attackWidth - self.width)/2
                 self.attackHeight = self.height + 5

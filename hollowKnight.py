@@ -28,7 +28,7 @@ oval2 = Terrain(650, 1000, 1000, 1600, 'outerOval')
 
 groundEnemy1 = GroundEnemy(400, 100, 30, 30, 50, None)
 groundEnemy2 = GroundEnemy(800, 100, 30, 30, 50, None)
-groundEnemyVertical1 = GroundEnemyVertical(600, 100, 30, 30, 500, None)
+groundEnemyVertical1 = GroundEnemyVertical(720, 100, 30, 30, 500, None)
 
 terrainsList = [flat1, flat2, flat3, oval1, oval2]
 enemyList = [groundEnemy1, groundEnemy2, groundEnemyVertical1]
@@ -41,12 +41,12 @@ def redrawAll(app):
     
     drawTerrain(app)
     drawEnemies(app)
-    # drawTestVectors(app)
+    drawTestVectors(app)
     drawHealth(app)
     drawPlayer(app)
     recordPreviousPositions(app)
     drawAttacks(app)
-    # drawTestVertices(app)
+    drawTestVertices(app)
 
 def drawTestVertices(app):
     if player.test == True and player.isAttacking == True:
