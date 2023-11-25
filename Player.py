@@ -16,8 +16,10 @@ class Player(Entity):
                 self.attackDirection = self.direction
                 self.isAttacking = True
                 self.looksAttacking = True
+                print('before', self.attackX, self.attackY)
                 if self.isCollidingWithOval == True:
                     self.alignAttacks()
+                print('after', self.attackX, self.attackY)
                 return
             self.attackWidth = self.width*5
             self.attackHeight = self.height
@@ -30,7 +32,7 @@ class Player(Entity):
             elif upwards == True and self.isCollidingWithOval == True:
                 self.attackY = self.y + self.height + self.deltaY
                 self.attackX = self.leftX + self.deltaX*2 - (self.attackWidth - self.width)/2 # times 2 because attack is based on self.leftX rather than self.middleX
-                self.attackHeight = self.height + 5
+                self.attackHeight = self.height 
                 self.attackDirection = 'up'
             elif downwards == True and self.isCollidingWithOval == False:
                 self.attackWidth = self.width
@@ -39,9 +41,9 @@ class Player(Entity):
                 self.attackX = self.leftX - (self.attackWidth - self.width)/2
             elif downwards == True and self.isCollidingWithOval == True:
                 self.attackWidth = self.width*5
-                self.attackY = self.y - self.height + self.deltaY + 5
+                self.attackY = self.y - self.height + self.deltaY
                 self.attackX = self.leftX - self.deltaX*2 - (self.attackWidth - self.width)/2
-                self.attackHeight = self.height + 5
+                self.attackHeight = self.height 
                 self.attackDirection = 'down'
             self.isAttacking = True
             self.looksAttacking = True
@@ -123,7 +125,6 @@ class Player(Entity):
             ]
         middleX = self.middleX
         middleY = self.middleY
-        self.rotateAngle
 
         if self.rotateAngle == 0:
             pass
@@ -142,34 +143,34 @@ class Player(Entity):
                 (self.vectorRightX.getIntersection(self.vectorLeftY))
             ]
 
-        if self.attackDirection == 'right':
-            self.attackPointOfInterest = self.cornersAttack[0]
-            self.originalPointOfInterest = self.cornersRotated[2]
-            (x1, y1) = self.attackPointOfInterest
-            (x2, y2) = self.originalPointOfInterest
-            distance = self.distance(x1, y1, x2, y2)
-            deltaX = math.sin(self.rotateAngle*math.pi/180)*distance
-            deltaY = math.cos(self.rotateAngle*math.pi/180)*distance
-            if self.rotateAngle > 0:
-                self.alignAttackX = -deltaX
-                self.alignAttackY = -deltaY
-            elif self.rotateAngle < 0:
-                self.alignAttackX = -deltaX
-                self.alignAttackY = deltaY
-        elif self.attackDirection == 'left':
-            self.attackPointOfInterest = self.cornersAttack[2]
-            self.originalPointOfInterest = self.cornersRotated[0]
-            (x1, y1) = self.attackPointOfInterest
-            (x2, y2) = self.originalPointOfInterest
-            distance = self.distance(x1, y1, x2, y2)
-            deltaX = math.sin(self.rotateAngle*math.pi/180)*distance
-            deltaY = math.cos(self.rotateAngle*math.pi/180)*distance
-            if self.rotateAngle > 0:
-                self.alignAttackX = deltaX
-                self.alignAttackY = deltaY
-            elif self.rotateAngle < 0:
-                self.alignAttackX = deltaX
-                self.alignAttackY = -deltaY
-        self.attackX += self.alignAttackX
-        self.attackY += self.alignAttackY
+            if self.attackDirection == 'right':
+                self.attackPointOfInterest = self.cornersAttack[0]
+                self.originalPointOfInterest = self.cornersRotated[2]
+                (x1, y1) = self.attackPointOfInterest
+                (x2, y2) = self.originalPointOfInterest
+                distance = self.distance(x1, y1, x2, y2)
+                deltaX = math.sin(-self.rotateAngle*math.pi/180)*distance
+                deltaY = math.cos(-self.rotateAngle*math.pi/180)*distance
+                if self.rotateAngle > 0:
+                    self.alignAttackX = deltaX
+                    self.alignAttackY = -deltaY
+                elif self.rotateAngle < 0:
+                    self.alignAttackX = -deltaX
+                    self.alignAttackY = deltaY
+            elif self.attackDirection == 'left':
+                self.attackPointOfInterest = self.cornersAttack[2]
+                self.originalPointOfInterest = self.cornersRotated[0]
+                (x1, y1) = self.attackPointOfInterest
+                (x2, y2) = self.originalPointOfInterest
+                distance = self.distance(x1, y1, x2, y2)
+                deltaX = math.sin(-self.rotateAngle*math.pi/180)*distance
+                deltaY = math.cos(-self.rotateAngle*math.pi/180)*distance
+                if self.rotateAngle > 0:
+                    self.alignAttackX = -deltaX
+                    self.alignAttackY = deltaY
+                elif self.rotateAngle < 0:
+                    self.alignAttackX = deltaX
+                    self.alignAttackY = -deltaY
+            self.attackX += self.alignAttackX
+            self.attackY += self.alignAttackY
                         
