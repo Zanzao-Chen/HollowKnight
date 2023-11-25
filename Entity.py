@@ -297,30 +297,14 @@ class Entity:
         self.fourPointsEnemy2 = self.projectedEnemy[4:]
 
         if self.rotateAngle == 0:
-            fourPointsY = []
-            for (x, y) in self.fourPointsAttack1:
-                fourPointsY.append(y)
-            index1, index2 = fourPointsY.index(max(fourPointsY)), fourPointsY.index(min(fourPointsY))
-            self.twoPointsAttack1 = [self.fourPointsAttack1[index1], self.fourPointsAttack1[index2]]
-            fourPointsY = []
-            for (x, y) in self.fourPointsAttack2:
-                fourPointsY.append(y)
-            index1, index2 = fourPointsY.index(max(fourPointsY)), fourPointsY.index(min(fourPointsY))
-            self.twoPointsAttack2 = [self.fourPointsAttack2[index1], self.fourPointsAttack2[index2]]
+            self.twoPointsAttack1 = [self.fourPointsAttack1[0], self.fourPointsAttack1[3]]
+            self.twoPointsAttack2 = [self.fourPointsAttack2[0], self.fourPointsAttack2[3]]
         else:
             self.twoPointsAttack1 = [max(self.fourPointsAttack1), min(self.fourPointsAttack1)]
             self.twoPointsAttack2 = [max(self.fourPointsAttack2), min(self.fourPointsAttack2)]
         if enemy.rotateAngle == 0:
-            fourPointsY = []
-            for (x, y) in self.fourPointsEnemy1:
-                fourPointsY.append(y)
-            index1, index2 = fourPointsY.index(max(fourPointsY)), fourPointsY.index(min(fourPointsY))
-            self.twoPointsEnemy1 = [self.fourPointsEnemy1[index1], self.fourPointsEnemy1[index2]]
-            fourPointsY = []
-            for (x, y) in self.fourPointsEnemy2:
-                fourPointsY.append(y)
-            index1, index2 = fourPointsY.index(max(fourPointsY)), fourPointsY.index(min(fourPointsY))
-            self.twoPointsEnemy2 = [self.fourPointsEnemy2[index1], self.fourPointsEnemy2[index2]]
+            self.twoPointsEnemy1 = [self.fourPointsEnemy1[0], self.fourPointsEnemy1[3]]
+            self.twoPointsEnemy2 = [self.fourPointsEnemy2[0], self.fourPointsEnemy2[3]]
         else:
             self.twoPointsEnemy1 = [max(self.fourPointsEnemy1), min(self.fourPointsEnemy1)]
             self.twoPointsEnemy2 = [max(self.fourPointsEnemy2), min(self.fourPointsEnemy2)]

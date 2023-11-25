@@ -52,7 +52,6 @@ class Vector:
             newY = y - deltaY
         elif vertical == 'up':
             newY = y + deltaY
-        print(self, "distance", distance, horizontal, vertical, deltaX, deltaY)
         return(newX, newY)
     
     def getIntersection(self, other):

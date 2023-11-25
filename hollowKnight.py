@@ -31,7 +31,7 @@ groundEnemy2 = GroundEnemy(800, 100, 30, 30, 50, None)
 groundEnemyVertical1 = GroundEnemyVertical(720, 100, 30, 30, 500, None)
 
 terrainsList = [flat1, flat2, flat3, oval1, oval2]
-enemyList = [groundEnemy1, groundEnemy2, groundEnemyVertical1]
+enemyList = [groundEnemy1, groundEnemyVertical1, groundEnemy2]
 
 def redrawAll(app):
     drawRect(0, 0, 1000, 400, fill='grey') # super complex eye-saving technology :)
@@ -63,9 +63,9 @@ def drawTestVertices(app):
         for (x, y) in player.fourPointsEnemy2:
             drawCircle(x, y, 2, fill = 'white')
         for (x, y) in player.twoPointsAttack1:
-            drawCircle(x, y, 2, fill='blue')
+            drawCircle(x, y, 2, fill='yellow')
         for (x, y) in player.twoPointsAttack2:
-            drawCircle(x, y, 2, fill='blue')
+            drawCircle(x, y, 2, fill='yellow')
         for (x, y) in player.twoPointsEnemy1:
             drawCircle(x, y, 2, fill = 'blue')
         for (x, y) in player.twoPointsEnemy2:
@@ -73,16 +73,16 @@ def drawTestVertices(app):
 
 def drawTestVectors(app):
     if player.test == True and player.isAttacking == True:
-        # for vector in [player.vectorAttackLeftX, 
-        #             player.vectorAttackRightX, 
-        #             player.vectorAttackRightY, 
-        #             player.vectorAttackLeftY,
-        #             player.vectorEnemyLeftX,
-        #             player.vectorEnemyRightX,
-        #             player.vectorEnemyLeftY,
-        #             player.vectorEnemyRightY]:
-        #     (x, y, x1, y2) = vector.draw()
-        #     drawLine(x, y, x1, y2)
+        for vector in [player.vectorAttackLeftX, 
+                    player.vectorAttackRightX, 
+                    player.vectorAttackRightY, 
+                    player.vectorAttackLeftY,
+                    player.vectorEnemyLeftX,
+                    player.vectorEnemyRightX,
+                    player.vectorEnemyLeftY,
+                    player.vectorEnemyRightY]:
+            (x, y, x1, y2) = vector.draw()
+            drawLine(x, y, x1, y2)
         (x, y, x1, y2) = player.vectorAttackX.draw()
         drawLine(x, y, x1, y2, fill = 'green')
         (x, y, x1, y2) = player.vectorAttackY.draw()
