@@ -73,16 +73,16 @@ def drawTestVertices(app):
 
 def drawTestVectors(app):
     if player.test == True and player.isAttacking == True:
-        for vector in [player.vectorAttackLeftX, 
-                    player.vectorAttackRightX, 
-                    player.vectorAttackRightY, 
-                    player.vectorAttackLeftY,
-                    player.vectorEnemyLeftX,
-                    player.vectorEnemyRightX,
-                    player.vectorEnemyLeftY,
-                    player.vectorEnemyRightY]:
-            (x, y, x1, y2) = vector.draw()
-            drawLine(x, y, x1, y2)
+        # for vector in [player.vectorAttackLeftX, 
+        #             player.vectorAttackRightX, 
+        #             player.vectorAttackRightY, 
+        #             player.vectorAttackLeftY,
+        #             player.vectorEnemyLeftX,
+        #             player.vectorEnemyRightX,
+        #             player.vectorEnemyLeftY,
+        #             player.vectorEnemyRightY]:
+        #     (x, y, x1, y2) = vector.draw()
+        #     drawLine(x, y, x1, y2)
         (x, y, x1, y2) = player.vectorAttackX.draw()
         drawLine(x, y, x1, y2, fill = 'green')
         (x, y, x1, y2) = player.vectorAttackY.draw()
@@ -128,7 +128,7 @@ def drawTerrain(app):
 def drawAttacks(app):
     if player.isAttacking == True or player.looksAttacking == True:
         drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
-        player.isAttacking = False
+        # player.isAttacking = False
 
 def drawEnemies(app):
     for enemy in enemyList:

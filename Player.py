@@ -16,10 +16,8 @@ class Player(Entity):
                 self.attackDirection = self.direction
                 self.isAttacking = True
                 self.looksAttacking = True
-                print('before', self.attackX, self.attackY)
                 if self.isCollidingWithOval == True:
                     self.alignAttacks()
-                print('after', self.attackX, self.attackY)
                 return
             self.attackWidth = self.width*5
             self.attackHeight = self.height

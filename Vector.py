@@ -38,9 +38,12 @@ class Vector:
         if self.angleY >= 0:
             deltaX = math.sin((-self.angleY+90)*math.pi/180)*distance
             deltaY = math.cos((-self.angleY+90)*math.pi/180)*distance
-        elif self.angleY < 0:
+        elif self.angleY < 0 and self.angleY >= -90:
             deltaX = math.sin((self.angleY+90)*math.pi/180)*distance
             deltaY = math.cos((self.angleY+90)*math.pi/180)*distance
+        elif self.angleY < -90:
+            deltaX = math.cos((self.angleY+180)*math.pi/180)*distance
+            deltaY = math.sin((self.angleY+180)*math.pi/180)*distance
         if horizontal == 'left':
             newX = x + deltaX
         elif horizontal == 'right':
@@ -49,6 +52,7 @@ class Vector:
             newY = y - deltaY
         elif vertical == 'up':
             newY = y + deltaY
+        print(self, "distance", distance, horizontal, vertical, deltaX, deltaY)
         return(newX, newY)
     
     def getIntersection(self, other):
