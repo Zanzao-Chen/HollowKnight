@@ -89,6 +89,12 @@ class Entity:
         self.isPogoing = False
         self.timerPogo = 0
         self.positionsPogo = []
+        self.isPogoingWhileJumping = True
+        self.timerPogoJumping = 0
+        self.isCollidingWithRect = False
+        self.isCollidingWithAnything = False
+        self.terrainCollisionsDict = dict()
+        self.isPogoingOnGround = False
 
     def move(self, direction):
         self.x += direction*self.speed
@@ -105,10 +111,20 @@ class Entity:
             self.y = newPosition
 
     def pogoJump(self):
-        if self.isPogoing == True:
+        if self.falling and not self.isCollidingWithAnything and not self.isPogoingOnGround:
+            print(2)
+            self.isPogoingWhileJumping = True
+        elif self.isCollidingWithAnything or self.isPogoingOnGround:
+            print(1)
+            self.isPogoingWhileJumping = False
+            self.isPogoingOnGround = True
             self.jumping = False
-            newPosition = -(self.timerPogo - self.y - (self.maxJumpHeight*1.2)**0.5) + self.maxJumpHeight*1.2
+            newPosition = -(self.timerPogo - self.y - (self.maxJumpHeight*1)**0.5) + self.maxJumpHeight*1
             self.y = newPosition
+    
+    def pogoJumpWhileJumping(self):
+        newPosition = -(self.timerPogoJumping - self.y - (self.maxJumpHeight*1.2)**0.5) + self.maxJumpHeight*1.2
+        self.y = newPosition
 
     def fall(self):
         if self.falling == True and self.jumping == False and self.isPogoing == False:
@@ -175,8 +191,6 @@ class Entity:
             elif self.x > self.collidedEnemy.x:
                 self.x += self.knockBackX
             
-
-
     def checkColliding(self, terrain):
         self.getPlayerVertices()
         if terrain.type == 'Rectangle':

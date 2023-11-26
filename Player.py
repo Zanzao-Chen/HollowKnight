@@ -19,11 +19,9 @@ class Player(Entity):
                 if self.isCollidingWithOval == True:
                     self.alignAttacks()
                 return
-            self.attackWidth = self.width*5
-            self.attackHeight = self.height
+            self.attackWidth = self.width*3
+            self.attackHeight = self.height*1.2
             if upwards == True and self.isCollidingWithOval == False:
-                self.attackWidth = self.width
-                self.attackHeight = self.height*2
                 self.attackY = self.y + self.attackHeight
                 self.attackX = self.leftX - (self.attackWidth - self.width)/2
                 self.attackDirection = 'up'
@@ -33,12 +31,10 @@ class Player(Entity):
                 self.attackHeight = self.height 
                 self.attackDirection = 'up'
             elif downwards == True and self.isCollidingWithOval == False:
-                self.attackWidth = self.width
-                self.attackHeight = self.height*2
                 self.attackY = self.y - self.height
                 self.attackX = self.leftX - (self.attackWidth - self.width)/2
+                self.attackDirection = 'down'
             elif downwards == True and self.isCollidingWithOval == True:
-                self.attackWidth = self.width*5
                 self.attackY = self.y - self.height + self.deltaY
                 self.attackX = self.leftX - self.deltaX*2 - (self.attackWidth - self.width)/2
                 self.attackHeight = self.height 
@@ -52,12 +48,14 @@ class Player(Entity):
             self.falling = False
             self.jumping = False
             self.isPogoing = False
+            self.isPogoingWhileJumping = False
             self.dashing = True
         elif self.direction == 'right':
             self.x += self.dashDistance/self.dashDuration
             self.falling = False
             self.jumping = False
             self.isPogoing = False
+            self.isPogoingWhileJumping = False
             self.dashing = True
 
     def attackKnockBack(self, enemy):
@@ -67,8 +65,6 @@ class Player(Entity):
         elif self.attackDirection == 'right':
             self.x -= self.playerAttackKnockBackDistanceHorizontal
             enemy.x += enemy.enemyAttackKnockBackDistanceHorizontal
-        elif self.attackDirection == 'up':
-            enemy.y += enemy.enemyKnockBackDistanceVertical
         elif self.attackDirection == 'down':
             self.isPogoing = True
     def alignAttacks(self):

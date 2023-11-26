@@ -128,7 +128,7 @@ def drawTerrain(app):
 def drawAttacks(app):
     if player.isAttacking == True or player.looksAttacking == True:
         drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
-        # player.isAttacking = False
+        player.isAttacking = False
 
 def drawEnemies(app):
     for enemy in enemyList:
@@ -221,6 +221,7 @@ def onStep(app):
                 player.updateHealth(-1)
                 player.enemyCollisionDirection = direction
                 player.collidedEnemy = enemy
+                
 
         if player.stopFreeze == True:
             player.knockBack(player.enemyCollisionDirection)
@@ -263,6 +264,7 @@ def onStep(app):
             for enemy in enemyList:
                 isColliding = False
                 (isColliding, direction, reference) = enemy.checkColliding(terrain)
+                
                 if isColliding and terrain.type == 'Rectangle' and direction in ['left', 'right']:
                     enemy.direction *= -1
                 if not isColliding and terrain.type == 'outerOval':
@@ -301,7 +303,7 @@ def onStep(app):
 
         if player.falling:
             player.timer += 1
-            # player.timerPogo += 1
+            player.timerPogo += 1
             player.fall()
         if player.jumping:
             player.timer += 1
@@ -309,12 +311,19 @@ def onStep(app):
         if player.isPogoing:
             player.timerPogo += 1
             player.pogoJump()
+        if player.isPogoingWhileJumping:
+            player.timerPogoJumping += 1
+            player.pogoJumpWhileJumping()
+        player.terrainCollisionsDict = dict()
+        
         for terrain in terrainsList:
             isColliding = False
             (isColliding, direction, reference) = player.checkColliding(terrain)
+            player.terrainCollisionsDict[terrain] = isColliding
             if not isColliding and terrain.type == 'outerOval':
                 player.isCollidingWithOval = False
             elif isColliding and terrain.type == 'Rectangle':
+                player.isCollidingWithRect = True
                 if player.rotateAngle != 0:
                     player.index += 0.05
                     player.resetAngle()
@@ -328,6 +337,9 @@ def onStep(app):
                     player.y = -(reference - player.height)
                     player.jumping = False
                     player.isPogoing = False
+                    player.isPogoingOnGround = False
+                    player.isPogoingWhileJumping = False
+                    player.timerPogoJumping = 0
                     player.positions = []
                     player.timer = 0
                     player.timerPogo = 0
@@ -340,9 +352,18 @@ def onStep(app):
                     player.y = -(realY - player.height)
                     player.jumping = False
                     player.isPogoing = False
+                    player.isPogoingOnGround = False
                     player.positions = []
                     player.timer = 0
                     player.timerPogo = 0
+                    player.isPogoingWhileJumping = False
+                    player.timerPogoJumping = 0
+    player.isCollidingWithAnything = False
+    
+    for key in player.terrainCollisionsDict:
+        if player.terrainCollisionsDict[key] == True:
+            player.isCollidingWithAnything = True
+
 
 
 def implementLeftRightCollisions(object, terrain):

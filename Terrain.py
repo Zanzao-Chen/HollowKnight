@@ -6,6 +6,8 @@ class Terrain:
         self.height = height
         self.type = type
         self.radius = radius
+    def __repr__(self):
+        return f"{self.type} terrain, x: {self.x}, y:{self.y}"
     def getTerrainVertices(self):
         if self.type == 'Rectangle':
             self.leftX = self.x
