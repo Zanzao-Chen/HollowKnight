@@ -1,7 +1,17 @@
+# Citations:
+# Stack Overflow, How to detect when rotated rectangles are colliding each other
+# https://stackoverflow.com/questions/62028169/how-to-detect-when-rotated-rectangles-are-colliding-each-other 
+# I did not use any code from this source; I only used the visual pictures to understand the theory for the separating axis algorithm
+
+# How to run: use ctrl+b on this file, with the other .py files in the same folder
+
 from cmu_graphics import *
 from Player import *
 from Terrain import *
 from Enemy import *
+
+from PIL import Image, ImageOps
+import os, pathlib
 
 def onAppStart(app):
     app.stepsPerSecond = 30
@@ -18,6 +28,9 @@ def onAppStart(app):
     app.generalDashingCounter = 0
     app.initialDashingCounter = 0
 
+    app.idleSprites = []
+    createPlayerSprites(app)
+
 player = Player(215, -100, 20, 50)
 flat1 = Terrain(0, 250, app.width, 50, 'Rectangle')
 flat2 = Terrain(200, 230, app.width*2, 50, 'Rectangle')
@@ -31,14 +44,14 @@ groundEnemy2 = GroundEnemy(800, 100, 30, 30, 50, None)
 groundEnemyVertical1 = GroundEnemyVertical(720, 100, 30, 30, 500, None)
 
 terrainsList = [flat1, flat2, flat3, oval1, oval2]
-enemyList = [groundEnemy1, groundEnemyVertical1, groundEnemy2]
+enemyList = [groundEnemy1, groundEnemy2, groundEnemyVertical1]
 
 def redrawAll(app):
-    drawRect(0, 0, 1000, 400, fill='grey') # super complex eye-saving technology :)
-    
+    # drawRect(0, 0, 1000, 400, fill='grey') 
+    drawLabel('O is jump, J is attack, I is dash', 200, 100)
+    drawLabel('Use AWDS to move and control attack direction', 200, 150)
     groundEnemyVertical1.getPlayerVertices()
     player.getPlayerVertices()
-    
     drawTerrain(app)
     drawEnemies(app)
     drawTestVectors(app)
@@ -84,13 +97,13 @@ def drawTestVectors(app):
             (x, y, x1, y2) = vector.draw()
             drawLine(x, y, x1, y2)
         (x, y, x1, y2) = player.vectorAttackX.draw()
-        drawLine(x, y, x1, y2, fill = 'green')
+        drawLine(x, y, x1, y2, fill = 'red')
         (x, y, x1, y2) = player.vectorAttackY.draw()
-        drawLine(x, y, x1, y2, fill = 'green')
+        drawLine(x, y, x1, y2, fill = 'red')
         (x, y, x1, y2) = player.vectorEnemyX.draw()
-        drawLine(x, y, x1, y2, fill = 'green')
+        drawLine(x, y, x1, y2, fill = 'red')
         (x, y, x1, y2) = player.vectorEnemyY.draw()
-        drawLine(x, y, x1, y2, fill = 'green')
+        drawLine(x, y, x1, y2, fill = 'red')
 
 def drawHealth(app):
     for i in range(len(player.healthList)):
@@ -108,6 +121,28 @@ def drawPlayer(app):
         drawRect(x, -y, player.width, player.height, fill = 'black', rotateAngle = angle, opacity = 20)
     drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
     drawCircle(player.orientationX, player.orientationY, 3, fill='red')
+    
+    if player.direction == 'left':
+        sprite = app.idleSprites[1]
+        drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+    elif player.direction == 'right':
+        sprite = app.idleSprites[0]
+        drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+
+def createPlayerSprites(app):
+    spritestrip = Image.open('playerSprites.png')
+    i = 0
+    frame = spritestrip.crop((0+79*i, 2, 79+79*i, 79))
+    sprite = CMUImage(frame)
+    app.idleSprites.append(sprite)
+
+    spritestrip = Image.open('playerSprites.png')
+    i = 0
+    frame = spritestrip.crop((0+79*i, 2, 79+79*i, 79))
+    frameFlipped = ImageOps.mirror(frame)
+    sprite = CMUImage(frameFlipped)
+    
+    app.idleSprites.append(sprite)
 
 def recordPreviousPositions(app):
     player.previousPositions.append((player.x, -player.y))
@@ -136,6 +171,7 @@ def drawEnemies(app):
             drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, rotateAngle = enemy.rotateAngle)
         else:
             enemyList.remove(enemy)
+
 def onKeyPress(app, key):
     if player.freezeEverything == False:
         if key == 'a':
@@ -148,7 +184,7 @@ def onKeyPress(app, key):
             player.move(+1)
             for terrain in terrainsList:
                 implementLeftRightCollisions(player, terrain)
-        if key == 'o' and (player.jumping == False and player.isPogoing == False):
+        if key == 'o' and (player.jumping == False and player.isPogoing == False and player.dashing == False):
             player.jumping = True
         if key == 'j':
             if player.holdingUp == True:

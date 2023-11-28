@@ -112,10 +112,8 @@ class Entity:
 
     def pogoJump(self):
         if self.falling and not self.isCollidingWithAnything and not self.isPogoingOnGround:
-            print(2)
             self.isPogoingWhileJumping = True
         elif self.isCollidingWithAnything or self.isPogoingOnGround:
-            print(1)
             self.isPogoingWhileJumping = False
             self.isPogoingOnGround = True
             self.jumping = False
