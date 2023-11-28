@@ -28,8 +28,14 @@ def onAppStart(app):
     app.generalDashingCounter = 0
     app.initialDashingCounter = 0
 
-    app.idleSprites = []
-    createPlayerSprites(app)
+    app.spriteCounterDash = 0
+    app.spriteCounterMove = 0 
+    app.stepCounter = 0
+    
+    createPlayerIdleSprites(app)
+    createPlayerMovingSprites(app)
+    createPlayerDashingSprites(app)
+    createPlayerDashingSpritesFinal(app)
 
 player = Player(215, -100, 20, 50)
 flat1 = Terrain(0, 250, app.width, 50, 'Rectangle')
@@ -47,7 +53,6 @@ terrainsList = [flat1, flat2, flat3, oval1, oval2]
 enemyList = [groundEnemy1, groundEnemy2, groundEnemyVertical1]
 
 def redrawAll(app):
-    # drawRect(0, 0, 1000, 400, fill='grey') 
     drawLabel('O is jump, J is attack, I is dash', 200, 100)
     drawLabel('Use AWDS to move and control attack direction', 200, 150)
     groundEnemyVertical1.getPlayerVertices()
@@ -117,22 +122,47 @@ def drawPlayer(app):
         player.dashingPositions.append((player.x, player.y, player.rotateAngle))
     elif player.dashing == False:
         player.dashingPositions = []
+    # if player.dashing == False:
+    #     if player.direction == 'left':
+    #         sprite = app.idleSprites[1]
+    #     elif player.direction == 'right':
+    #         sprite = app.idleSprites[0]
     for (x, y, angle) in player.dashingPositions:
-        drawRect(x, -y, player.width, player.height, fill = 'black', rotateAngle = angle, opacity = 20)
-    drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
-    drawCircle(player.orientationX, player.orientationY, 3, fill='red')
-    
-    if player.direction == 'left':
-        sprite = app.idleSprites[1]
-        drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
-    elif player.direction == 'right':
-        sprite = app.idleSprites[0]
-        drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+        if player.direction == 'left':
+            sprite = app.dashSpritesFlipped[app.spriteCounterDash]
+            drawImage(sprite, x, -y+18, rotateAngle = angle, align = 'center', opacity = 20)
+        elif player.direction == 'right':
+            sprite = app.dashSprites[app.spriteCounterDash]
+            drawImage(sprite, x, -y+18, rotateAngle = angle, align = 'center', opacity = 20)
+    # drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
+    # drawCircle(player.orientationX, player.orientationY, 3, fill='red')
+    if player.dashing == True:
+        if player.direction == 'right':
+            sprite = app.dashSpritesFinal[1]
+        elif player.direction == 'left':
+            sprite = app.dashSpritesFinal[0]
+        drawImage(sprite, player.x, -player.y+18, align = 'center')
+    if player.moving == False and player.dashing == False:
+        if player.direction == 'left':
+            sprite = app.idleSprites[1]
+            drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+        elif player.direction == 'right':
+            sprite = app.idleSprites[0]
+            drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+    elif player.moving == True and player.dashing == False:
+        if player.direction == 'right':
+            sprite = app.moveSprites[app.spriteCounterMove]
+            drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+        elif player.direction == 'left':
+            sprite = app.moveSpritesFlipped[app.spriteCounterMove]
+            drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
 
-def createPlayerSprites(app):
+def createPlayerIdleSprites(app):
+    app.idleSprites = []
     spritestrip = Image.open('playerSprites.png')
     i = 0
     frame = spritestrip.crop((0+79*i, 2, 79+79*i, 79))
+    app.spriteWidth, app.spriteHeight = frame.size
     sprite = CMUImage(frame)
     app.idleSprites.append(sprite)
 
@@ -141,8 +171,60 @@ def createPlayerSprites(app):
     frame = spritestrip.crop((0+79*i, 2, 79+79*i, 79))
     frameFlipped = ImageOps.mirror(frame)
     sprite = CMUImage(frameFlipped)
-    
     app.idleSprites.append(sprite)
+
+def createPlayerMovingSprites(app):
+    spritestrip = Image.open('playerSprites.png')
+    app.moveSprites = []
+    app.moveSpritesFlipped = []
+    for i in range(1, 9):
+        frame = spritestrip.crop((0+79*i, 2, 79+79*i, 79))
+        sprite = CMUImage(frame)
+        app.moveSprites.append(sprite)
+    for i in range(1, 9):
+        frame = spritestrip.crop((0+79*i, 2, 79+79*i, 79))
+        frameFlipped = ImageOps.mirror(frame)
+        sprite = CMUImage(frameFlipped)
+        app.moveSpritesFlipped.append(sprite)
+
+def createPlayerDashingSprites(app):
+    spritestrip = Image.open('dashSprites.png')
+    app.dashSprites = []
+    for i in range(5):
+        frame = spritestrip.crop((0+130*i, 520, 130+130*i, 640))
+        frame = frame.resize((app.spriteWidth, app.spriteHeight))
+        sprite = CMUImage(frame)
+        app.dashSprites.append(sprite)
+    app.dashSpritesFlipped = []
+    for i in range(5):
+        frame = spritestrip.crop((0+130*i, 520, 130+130*i, 640))
+        frame = frame.resize((app.spriteWidth, app.spriteHeight))
+        frameFlipped = ImageOps.mirror(frame)
+        sprite = CMUImage(frameFlipped)
+        app.dashSpritesFlipped.append(sprite)
+def createPlayerDashingSpritesFinal(app):
+    app.dashSpritesFinal = []
+
+    spritestrip = Image.open('Knight.png')
+    frame = spritestrip.crop((2624, 1550, 2624+164, 1664))
+    width, height = frame.size
+    factor = app.spriteHeight/height
+    frame = frame.resize((int(width*factor), int(height*factor)))
+    sprite = CMUImage(frame)
+    app.dashSpritesFinal.append(sprite)
+
+    frame = ImageOps.mirror(frame)
+    sprite = CMUImage(frame)
+    app.dashSpritesFinal.append(sprite)
+
+def moveSprites(app):
+    app.stepCounter += 1
+    if app.stepCounter>= 5:
+        app.spriteCounterMove = (1 + app.spriteCounterMove) % len(app.moveSprites)
+        app.stepCounter = 0 
+    if app.stepCounter>= 5:
+        app.spriteCounterDash = (1 + app.spriteCounterDash) % len(app.dashSprites)
+        app.stepCounter = 0 
 
 def recordPreviousPositions(app):
     player.previousPositions.append((player.x, -player.y))
@@ -235,6 +317,8 @@ def onKeyHold(app, key):
                     player.attackKnockBack(enemy)
 
 def onKeyRelease(app, key):
+    if key == 'd' or key == 'a':
+        player.moving = False
     if key == 'w':
         player.holdingUp = False
     elif key == 's':
@@ -250,6 +334,8 @@ def onStep(app):
        
     
     elif player.freezeEverything == False:
+        moveSprites(app)
+
         app.generalCounter += 1
         for enemy in enemyList:
             (isColliding, direction, reference) = player.isCollidingRect(enemy)

@@ -39,7 +39,7 @@ class Entity:
         self.healthY = 20 
         self.healthRadius = 10
         self.yesHealthColor = 'black'
-        self.noHealthColor = 'white'
+        self.noHealthColor = 'grey'
         self.holdingUp = False
         self.holdingDown = False
         self.isCollidingWithOval = False
@@ -95,8 +95,11 @@ class Entity:
         self.isCollidingWithAnything = False
         self.terrainCollisionsDict = dict()
         self.isPogoingOnGround = False
+        self.moving = False
 
     def move(self, direction):
+        if self.isCollidingWithAnything:
+            self.moving =True
         self.x += direction*self.speed
 
     def jump(self):
