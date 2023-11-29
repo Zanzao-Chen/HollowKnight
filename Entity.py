@@ -97,6 +97,8 @@ class Entity:
         self.isPogoingOnGround = False
         self.moving = False
 
+        self.spriteX = 20
+
     def move(self, direction):
         if self.isCollidingWithAnything:
             self.moving =True

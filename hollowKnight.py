@@ -9,9 +9,9 @@ from cmu_graphics import *
 from Player import *
 from Terrain import *
 from Enemy import *
+from powerUp import *
 
 from PIL import Image, ImageOps
-import os, pathlib
 
 def onAppStart(app):
     app.stepsPerSecond = 30
@@ -36,27 +36,35 @@ def onAppStart(app):
     createPlayerMovingSprites(app)
     createPlayerDashingSprites(app)
     createPlayerDashingSpritesFinal(app)
+    createTerrainSprites(app)
+    createBackgroundSprites(app)
 
-player = Player(215, -100, 20, 50)
-flat1 = Terrain(0, 250, app.width, 50, 'Rectangle')
-flat2 = Terrain(200, 230, app.width*2, 50, 'Rectangle')
-flat3 = Terrain(0, 230, 50, 50, 'Rectangle')
-oval1 = Terrain(650, 230, 100, 50, 'outerOval')
-oval2 = Terrain(650, 1000, 1000, 1600, 'outerOval')
+player = Player(215, -100, 40, 50)
+flat1 = Terrain(300, 480, 521, 50, 'Rectangle')
+flat2 = Terrain(800, 480, 521, 50, 'Rectangle')
+flat3 = Terrain(0, 450, 521, 50, 'Rectangle')
+flat4 = Terrain(1042, 450, 521, 50, 'Rectangle')
+oval1 = Terrain(1000, 1300, 1000, 1600, 'outerOval')
 
+powerUp1 = powerUp(500, 230, 50, 50, 'Rectangle', 1)
+powerUp2 = powerUp(800, 230, 50, 50, 'Rectangle', 2)
+powerUp3 = powerUp(1000, 230, 50, 50, 'Rectangle', 3)
 
 groundEnemy1 = GroundEnemy(400, 100, 30, 30, 50, None)
 groundEnemy2 = GroundEnemy(800, 100, 30, 30, 50, None)
 groundEnemyVertical1 = GroundEnemyVertical(720, 100, 30, 30, 500, None)
 
-terrainsList = [flat1, flat2, flat3, oval1, oval2]
+terrainsList = [flat1, flat2, flat3, flat4, oval1]
 enemyList = [groundEnemy1, groundEnemy2, groundEnemyVertical1]
+
+powerUpList = [powerUp1, powerUp2, powerUp3]
 
 def redrawAll(app):
     drawLabel('O is jump, J is attack, I is dash', 200, 100)
     drawLabel('Use AWDS to move and control attack direction', 200, 150)
     groundEnemyVertical1.getPlayerVertices()
     player.getPlayerVertices()
+    drawBackground(app)
     drawTerrain(app)
     drawEnemies(app)
     drawTestVectors(app)
@@ -65,6 +73,10 @@ def redrawAll(app):
     recordPreviousPositions(app)
     drawAttacks(app)
     drawTestVertices(app)
+    
+def drawBackground(app):
+    sprite = app.backgroundSprites[0]
+    drawImage(sprite, 0, 0)
 
 def drawTestVertices(app):
     if player.test == True and player.isAttacking == True:
@@ -130,10 +142,10 @@ def drawPlayer(app):
     for (x, y, angle) in player.dashingPositions:
         if player.direction == 'left':
             sprite = app.dashSpritesFlipped[app.spriteCounterDash]
-            drawImage(sprite, x, -y+18, rotateAngle = angle, align = 'center', opacity = 20)
+            drawImage(sprite, x-player.spriteX, -y+18, rotateAngle = angle, align = 'left', opacity = 20)
         elif player.direction == 'right':
             sprite = app.dashSprites[app.spriteCounterDash]
-            drawImage(sprite, x, -y+18, rotateAngle = angle, align = 'center', opacity = 20)
+            drawImage(sprite, x-player.spriteX, -y+18, rotateAngle = angle, align = 'left', opacity = 20)
     # drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
     # drawCircle(player.orientationX, player.orientationY, 3, fill='red')
     if player.dashing == True:
@@ -141,21 +153,31 @@ def drawPlayer(app):
             sprite = app.dashSpritesFinal[1]
         elif player.direction == 'left':
             sprite = app.dashSpritesFinal[0]
-        drawImage(sprite, player.x, -player.y+18, align = 'center')
+        drawImage(sprite, player.x-player.spriteX, -player.y+18, align = 'left')
     if player.moving == False and player.dashing == False:
         if player.direction == 'left':
             sprite = app.idleSprites[1]
-            drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+            drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
         elif player.direction == 'right':
             sprite = app.idleSprites[0]
-            drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+            drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
     elif player.moving == True and player.dashing == False:
         if player.direction == 'right':
             sprite = app.moveSprites[app.spriteCounterMove]
-            drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+            drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
         elif player.direction == 'left':
             sprite = app.moveSpritesFlipped[app.spriteCounterMove]
-            drawImage(sprite, player.x, -player.y+18, rotateAngle = player.rotateAngle, align = 'center')
+            drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
+
+
+def createBackgroundSprites(app):
+    spritestrip = Image.open('background.png')
+    app.backgroundSprites = []
+    width, height = spritestrip.size
+    frame = spritestrip.resize((int(width*0.8), int(height*0.8)))
+    sprite = CMUImage(frame)
+    app.backgroundSprites.append(sprite)
+    
 
 def createPlayerIdleSprites(app):
     app.idleSprites = []
@@ -217,6 +239,24 @@ def createPlayerDashingSpritesFinal(app):
     sprite = CMUImage(frame)
     app.dashSpritesFinal.append(sprite)
 
+def drawTerrain(app):
+    for terrain in terrainsList:
+        if terrain.type == 'Rectangle':
+            sprite = app.terrainSprites[0]
+            # drawRect(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
+            drawImage(sprite, terrain.x, terrain.y-2, align = 'top-left')
+        elif terrain.type == 'outerOval':
+            drawOval(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
+
+def createTerrainSprites(app):
+    app.terrainSprites = []
+    spritestrip = Image.open('ground1.png')
+    width, height = spritestrip.size
+    frame = spritestrip.resize((int(width/3), int(height/3)))
+    print(width, height)
+    sprite = CMUImage(frame)
+    app.terrainSprites.append(sprite)
+
 def moveSprites(app):
     app.stepCounter += 1
     if app.stepCounter>= 5:
@@ -235,12 +275,6 @@ def recordPreviousPositions(app):
         if len(enemy.previousPositions) > 5:
             enemy.previousPositions = enemy.previousPositions[2:]
 
-def drawTerrain(app):
-    for terrain in terrainsList:
-        if terrain.type == 'Rectangle':
-            drawRect(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
-        elif terrain.type == 'outerOval':
-            drawOval(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
 
 def drawAttacks(app):
     if player.isAttacking == True or player.looksAttacking == True:
@@ -250,7 +284,7 @@ def drawAttacks(app):
 def drawEnemies(app):
     for enemy in enemyList:
         if enemy.isKilled == False:
-            drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, rotateAngle = enemy.rotateAngle)
+            drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, rotateAngle = enemy.rotateAngle, fill = 'white')
         else:
             enemyList.remove(enemy)
 
@@ -302,8 +336,12 @@ def onKeyHold(app, key):
                 implementLeftRightCollisions(player, terrain)
         if 'w' in key:
             player.holdingUp = True
+        else:
+            player.holdingUp = False
         if 's' in key:
             player.holdingDown = True
+        else: 
+            player.holdingDown = False
         if 'j' in key:
             if 'w' in key:
                 player.attack(upwards=True) 
