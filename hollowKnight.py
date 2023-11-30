@@ -313,6 +313,17 @@ def createAttackSprites(app):
         app.attackSprites.append(sprite)
     app.attackSprites.append(sprite)
 
+    app.attackUpDownSprites = []
+    frame = Image.open('playerAttackDownwards.png')
+    app.sprites = [ ]
+    width, height = frame.size
+    frame = frame.resize((int(width/5), int(height/5)))
+    sprite = CMUImage(frame)
+    app.attackUpDownSprites.append(sprite)
+    frameFlipped = ImageOps.flip(frame)
+    sprite = CMUImage(frameFlipped)
+    app.attackUpDownSprites.append(sprite)
+
 def createPlayerIdleSprites(app):
     app.idleSprites = []
     spritestrip = Image.open('playerSprites.png')
@@ -448,18 +459,19 @@ def drawAttacks(app):
             if player.spriteCounterAttack < 4:
                 # drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
                 sprite = app.attackSprites[player.spriteCounterAttack]
+                print(player.spriteCounterAttack)
                 drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
                 player.spriteCounterAttack += 1
                 player.isAttacking = False
             else:
                 player.spriteCounterAttack = 0
+                print(4)
                 sprite = app.attackSprites[4]
                 drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
                 player.isAttacking = False
             
         elif player.attackDirection == 'left':
             if player.spriteCounterAttack < 4:
-                # drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
                 sprite = app.attackSprites[player.spriteCounterAttack+5]
                 drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
                 player.spriteCounterAttack += 1
@@ -469,6 +481,16 @@ def drawAttacks(app):
                 sprite = app.attackSprites[4+5]
                 drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
                 player.isAttacking = False
+        elif player.attackDirection == 'up':
+            sprite = app.attackUpDownSprites[1]
+            drawImage(sprite, player.attackX, -player.attackY,rotateAngle=player.rotateAngle)
+            player.isAttacking = False
+        elif player.attackDirection == 'down':
+            sprite = app.attackUpDownSprites[0]
+            # drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
+            drawImage(sprite, player.attackX, -player.attackY,rotateAngle=player.rotateAngle)
+            player.isAttacking = False
+            
         
         
 

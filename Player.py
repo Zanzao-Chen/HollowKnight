@@ -8,10 +8,14 @@ class Player(Entity):
         self.getPlayerVertices()
         if app.generalCounter - self.previousAttackTime >= self.timeBetweenAttacks:
             self.previousAttackTime = app.generalCounter
-            self.attackX = self.x + (self.width if self.direction == 'right' else -self.attackWidth)
+            if self.direction == 'right':
+                self.attackX = self.x + self.width
+            elif self.direction == 'left':
+                self.attackX = self.x - self.attackWidth
+            # self.attackX = self.x + (self.width if self.direction == 'right' else -self.attackWidth)
             if downwards == False and upwards == False:
-                # self.attackWidth = self.width*5
-                # self.attackHeight = self.height
+                self.attackWidth = 350
+                self.attackHeight = 70      
                 self.attackY = self.y 
                 self.attackDirection = self.direction
                 self.isAttacking = True
@@ -19,8 +23,8 @@ class Player(Entity):
                 if self.isCollidingWithOval == True:
                     self.alignAttacks()
                 return
-            self.attackWidth = self.width*3
-            self.attackHeight = self.height*1.2
+            self.attackWidth = 150
+            self.attackHeight = 170
             if upwards == True and self.isCollidingWithOval == False:
                 self.attackY = self.y + self.attackHeight
                 self.attackX = self.leftX - (self.attackWidth - self.width)/2
