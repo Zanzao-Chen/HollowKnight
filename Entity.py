@@ -34,9 +34,9 @@ class Entity:
         self.damageTook = 0
         self.healthList = [True]*self.maxHealth
 
-        self.healthX = 20 # center of left-most health circle
+        self.healthX = 100 # center of left-most health circle
         self.healthXInterval = 30
-        self.healthY = 20 
+        self.healthY = 100 
         self.healthRadius = 10
         self.yesHealthColor = 'black'
         self.noHealthColor = 'grey'
@@ -101,6 +101,11 @@ class Entity:
         self.totalScrollX = 0
         self.dashesLeft = 1
 
+        self.doubleJumping = False
+        self.doubleTimer = 0
+        self.isKnockBack = True
+        self.hazardLimit = 700
+
     def move(self, direction):
         if self.isCollidingWithAnything:
             self.moving =True
@@ -115,6 +120,14 @@ class Entity:
                 self.reachFallPortion = False
             self.positions.append(self.y)
             newPosition = -(self.timer - self.y - (self.maxJumpHeight)**0.5) + self.maxJumpHeight
+            self.y = newPosition
+
+    def doubleJump(self):
+        if self.jumping == True:
+            newPosition = -(self.doubleTimer - self.y - (self.maxJumpHeight*1.7)**0.5) + self.maxJumpHeight*1.7
+            self.y = newPosition
+        elif self.jumping == False:
+            newPosition = -(self.doubleTimer - self.y - (self.maxJumpHeight*0.1)**0.5) + self.maxJumpHeight*0.1
             self.y = newPosition
 
     def pogoJump(self):
@@ -186,16 +199,18 @@ class Entity:
         
 
     def knockBack(self, collisionDirection):
-        self.y += self.knockBackY
-        if collisionDirection == 'right':
-            self.x -= self.knockBackX
-        elif collisionDirection == 'left':
-            self.x += self.knockBackX
-        elif collisionDirection in ['up', 'down']:
-            if self.x <= self.collidedEnemy.x:
+        if not -self.y >= self.hazardLimit - 100:
+            print(1)
+            self.y += self.knockBackY
+            if collisionDirection == 'right':
                 self.x -= self.knockBackX
-            elif self.x > self.collidedEnemy.x:
+            elif collisionDirection == 'left':
                 self.x += self.knockBackX
+            elif collisionDirection in ['up', 'down']:
+                if self.x <= self.collidedEnemy.x:
+                    self.x -= self.knockBackX
+                elif self.x > self.collidedEnemy.x:
+                    self.x += self.knockBackX
             
     def checkColliding(self, terrain):
         self.getPlayerVertices()

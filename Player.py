@@ -49,13 +49,16 @@ class Player(Entity):
             self.falling = False
             self.jumping = False
             self.isPogoing = False
+            self.doubleJumping = False
             self.isPogoingWhileJumping = False
             self.dashing = True
+            
         elif self.direction == 'right':
             self.x += self.dashDistance/self.dashDuration
             self.falling = False
             self.jumping = False
             self.isPogoing = False
+            self.doubleJumping = False
             self.isPogoingWhileJumping = False
             self.dashing = True
 
