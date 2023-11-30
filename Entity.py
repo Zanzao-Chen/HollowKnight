@@ -98,6 +98,7 @@ class Entity:
         self.moving = False
 
         self.spriteX = 20
+        self.totalScrollX = 0
 
     def move(self, direction):
         if self.isCollidingWithAnything:

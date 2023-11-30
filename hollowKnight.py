@@ -3,6 +3,11 @@
 # https://stackoverflow.com/questions/62028169/how-to-detect-when-rotated-rectangles-are-colliding-each-other 
 # I did not use any code from this source; I only used the visual pictures to understand the theory for the separating axis algorithm
 
+# Sprites:
+# Original Game Assets from the game Hollow Knight by Team Cherry: player and terrain sprites
+# Background: https://pbs.twimg.com/media/Dv340GcWsAMt33a?format=jpg&name=4096x4096 
+
+
 # How to run: use ctrl+b on this file, with the other .py files in the same folder
 
 from cmu_graphics import *
@@ -14,6 +19,9 @@ from powerUp import *
 from PIL import Image, ImageOps
 
 def onAppStart(app):
+    app.scrollX = 0
+    app.scrollMargin = 400
+
     app.stepsPerSecond = 30
     app.generalAttackCounter = 0
     app.previousAttackTime = 0
@@ -31,6 +39,9 @@ def onAppStart(app):
     app.spriteCounterDash = 0
     app.spriteCounterMove = 0 
     app.stepCounter = 0
+
+    app.hazardLimit = 700
+    
     
     createPlayerIdleSprites(app)
     createPlayerMovingSprites(app)
@@ -39,32 +50,41 @@ def onAppStart(app):
     createTerrainSprites(app)
     createBackgroundSprites(app)
 
-player = Player(215, -100, 40, 50)
-flat1 = Terrain(300, 480, 521, 50, 'Rectangle')
-flat2 = Terrain(800, 480, 521, 50, 'Rectangle')
-flat3 = Terrain(0, 450, 521, 50, 'Rectangle')
-flat4 = Terrain(1042, 450, 521, 50, 'Rectangle')
-oval1 = Terrain(1000, 1300, 1000, 1600, 'outerOval')
+
+
+
+player = Player(200, 0, 40, 50)
+flat1 = Terrain(300, 480, 521, 50, 'Rectangle', 'Long') # width 521, height 50
+flat2 = Terrain(800, 480, 521, 50, 'Rectangle', 'Long')
+flat3 = Terrain(0, 450, 521, 50, 'Rectangle', 'Long')
+flat4 = Terrain(1400, 430, 90, 90, 'Rectangle', 'Square') # width 90, height 90
+flat5 = Terrain(1600, 460, 90, 90, 'Rectangle', 'Square') # width 90, height 90
+oval1 = Terrain(1500, 450, 300, 150, 'outerOval', 'Oval')
+
+
 
 powerUp1 = powerUp(500, 230, 50, 50, 'Rectangle', 1)
 powerUp2 = powerUp(800, 230, 50, 50, 'Rectangle', 2)
 powerUp3 = powerUp(1000, 230, 50, 50, 'Rectangle', 3)
 
+
 groundEnemy1 = GroundEnemy(400, 100, 30, 30, 50, None)
 groundEnemy2 = GroundEnemy(800, 100, 30, 30, 50, None)
 groundEnemyVertical1 = GroundEnemyVertical(720, 100, 30, 30, 500, None)
 
-terrainsList = [flat1, flat2, flat3, flat4, oval1]
+terrainsList = [flat1, flat2, flat3, flat4, flat5, oval1]
 enemyList = [groundEnemy1, groundEnemy2, groundEnemyVertical1]
 
 powerUpList = [powerUp1, powerUp2, powerUp3]
 
+
 def redrawAll(app):
+    drawBackground(app)
     drawLabel('O is jump, J is attack, I is dash', 200, 100)
     drawLabel('Use AWDS to move and control attack direction', 200, 150)
+    sideScroll(app)
     groundEnemyVertical1.getPlayerVertices()
     player.getPlayerVertices()
-    drawBackground(app)
     drawTerrain(app)
     drawEnemies(app)
     drawTestVectors(app)
@@ -73,10 +93,33 @@ def redrawAll(app):
     recordPreviousPositions(app)
     drawAttacks(app)
     drawTestVertices(app)
-    
+    drawLine(200-player.totalScrollX, 0, 200-player.totalScrollX, 1000)
+
 def drawBackground(app):
     sprite = app.backgroundSprites[0]
     drawImage(sprite, 0, 0)
+
+def sideScroll(app):
+    if player.moving or player.dashing:
+        for enemy in enemyList:
+            enemy.x -= app.scrollX
+        for terrain in terrainsList:
+            terrain.x -= app.scrollX
+        player.x -= app.scrollX
+        player.totalScrollX += app.scrollX
+
+def makePlayerVisible(app):
+    player.getPlayerVertices()
+    if (player.middleX < app.scrollX + app.scrollMargin):
+        app.scrollX = player.middleX - app.scrollMargin
+        return True
+    elif (player.middleX > app.scrollX + app.width - app.scrollMargin):
+        app.scrollX = player.middleX - (app.width - app.scrollMargin)
+        return True
+    else:
+        app.scrollX = 0
+        
+    return False
 
 def drawTestVertices(app):
     if player.test == True and player.isAttacking == True:
@@ -242,18 +285,36 @@ def createPlayerDashingSpritesFinal(app):
 def drawTerrain(app):
     for terrain in terrainsList:
         if terrain.type == 'Rectangle':
-            sprite = app.terrainSprites[0]
-            # drawRect(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
-            drawImage(sprite, terrain.x, terrain.y-2, align = 'top-left')
+            if terrain.subtype == 'Long':
+                sprite = app.terrainSprites[0]
+                # drawRect(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
+                drawImage(sprite, terrain.x, terrain.y-2, align = 'top-left')
+            elif terrain.subtype == 'Square':
+                sprite = app.terrainSprites[1]
+                # drawRect(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
+                drawImage(sprite, terrain.x, terrain.y-2, align = 'top-left')
         elif terrain.type == 'outerOval':
-            drawOval(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
+            sprite = app.terrainSprites[2]
+            # drawOval(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
+            drawImage(sprite, terrain.x+20, terrain.y-2, align = 'center')
 
 def createTerrainSprites(app):
     app.terrainSprites = []
     spritestrip = Image.open('ground1.png')
     width, height = spritestrip.size
     frame = spritestrip.resize((int(width/3), int(height/3)))
-    print(width, height)
+    sprite = CMUImage(frame)
+    app.terrainSprites.append(sprite)
+
+    spritestrip = Image.open('squareGround.png')
+    width, height = spritestrip.size
+    frame = spritestrip.resize((int(width/5), int(height/5)))
+    sprite = CMUImage(frame)
+    app.terrainSprites.append(sprite)
+
+    spritestrip = Image.open('ovalGround2.png')
+    width, height = spritestrip.size
+    frame = spritestrip.resize((int(width/6), int(height/6)))
     sprite = CMUImage(frame)
     app.terrainSprites.append(sprite)
 
@@ -363,6 +424,21 @@ def onKeyRelease(app, key):
         player.holdingDown = False
 
 def onStep(app):
+    makePlayerVisible(app)
+    if -player.y >= app.hazardLimit-50:
+        player.updateHealth(-1)
+    if -player.y >= app.hazardLimit:
+        app.respawnPoints = [(200-player.totalScrollX, -200),
+                             (1200-player.totalScrollX, -200),
+                             (1650-player.totalScrollX, -200)]
+        respawnDistance = []
+        for (x, y) in app.respawnPoints:
+            respawnDistance.append(distance(x, y, player.x, player.y))
+            
+        minimumDistance = min(respawnDistance)
+        index = respawnDistance.index(minimumDistance)
+        player.x, player.y = app.respawnPoints[index]
+        
     if player.freezeEverything == True:
         app.generalFreezeCounter += 1
         if app.generalFreezeCounter - app.initialFreezeCounter > player.freezeDuration:
@@ -372,6 +448,7 @@ def onStep(app):
        
     
     elif player.freezeEverything == False:
+
         moveSprites(app)
 
         app.generalCounter += 1
@@ -533,9 +610,11 @@ def implementLeftRightCollisions(object, terrain):
             object.x = reference - object.width
         elif direction == 'left':
             object.x = reference
+def distance(x1, y1, x2, y2):
+    return ((x1-x2)**2 + (y1-y2)**2)**0.5
 
 
 def main():
-    runApp(width=1000, height=400)
+    runApp(width=1200, height=800)
 
 main()
