@@ -286,6 +286,12 @@ def createEnemySprites(app):
         frame = spritestrip.crop((i/3+2+82*i, 393, 81-i+82*i, 442))
         sprite = CMUImage(frame)
         app.chargingSprites.append(sprite)
+    
+    for i in range(4):
+        frame = spritestrip.crop((i/3+2+82*i, 393, 81-i+82*i, 442))
+        frameFlipped = ImageOps.mirror(frame)
+        sprite = CMUImage(frameFlipped)
+        app.chargingSprites.append(sprite)
 
 def createPlayerIdleSprites(app):
     app.idleSprites = []
@@ -398,7 +404,7 @@ def moveSprites(app):
         app.spriteCounterEnemy = (1 + app.spriteCounterEnemy) % (len(app.enemySprites)-3-7) # 3 for crawlid, 7 for left direction
         app.stepCounter3 = 0
     if app.stepCounter4 >= 5:
-        app.spriteCounterCharger = (1 + app.spriteCounterCharger) % (len(app.chargingSprites))
+        app.spriteCounterCharger = (1 + app.spriteCounterCharger) % (len(app.chargingSprites)-4)
         app.stepCounter4 = 0
 
 def recordPreviousPositions(app):
@@ -429,8 +435,12 @@ def drawEnemies(app):
                     drawImage(sprite, enemy.x, -enemy.y-5, rotateAngle = enemy.rotateAngle)
             if enemy.type == 'charger':
                 if enemy.isCharging == True:
-                    sprite = app.chargingSprites[app.spriteCounterCharger]
-                    drawImage(sprite, enemy.x, -enemy.y, rotateAngle = enemy.rotateAngle)
+                    if enemy.direction == -1:
+                        sprite = app.chargingSprites[app.spriteCounterCharger]
+                        drawImage(sprite, enemy.x, -enemy.y+30, rotateAngle = enemy.rotateAngle)
+                    elif enemy.direction == 1:
+                        sprite = app.chargingSprites[app.spriteCounterCharger+4]
+                        drawImage(sprite, enemy.x, -enemy.y+30, rotateAngle = enemy.rotateAngle)
                 elif enemy.isCharging == False:
                     if enemy.direction == -1:
                         sprite = app.enemySprites[app.spriteCounterEnemy+3]
