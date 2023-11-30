@@ -363,7 +363,7 @@ def onKeyPress(app, key):
                 implementLeftRightCollisions(player, terrain)
         if key == 'o' and (player.jumping == False and player.isPogoing == False and player.dashing == False):
             player.jumping = True
-        if key == 'j':
+        if key == 'j' and player.dashing == False:
             if player.holdingUp == True:
                 player.attack(upwards=True) 
                 player.holdingUp = False
@@ -376,7 +376,7 @@ def onKeyPress(app, key):
                 if player.isAttacking == True and player.checkAttackColliding(enemy) == True:
                     enemy.takeDamageEnemy(player.playerAttackDamage)
                     player.attackKnockBack(enemy)
-        if key == 'i':
+        if key == 'i' and player.dashesLeft > 0:
             player.dashing = True
         if key == 'p':
             app.stepsPerSecond = 0.01
@@ -403,7 +403,7 @@ def onKeyHold(app, key):
             player.holdingDown = True
         else: 
             player.holdingDown = False
-        if 'j' in key:
+        if 'j' in key and player.dashing == False:
             if 'w' in key:
                 player.attack(upwards=True) 
             elif 's' in key:
@@ -571,6 +571,7 @@ def onStep(app):
                 elif direction == 'up':
                     player.y = terrain.bottomY
                 elif direction == 'down':
+                    player.dashesLeft = 1
                     player.y = -(reference - player.height)
                     player.jumping = False
                     player.isPogoing = False
@@ -581,6 +582,7 @@ def onStep(app):
                     player.timer = 0
                     player.timerPogo = 0
             elif isColliding and terrain.type == 'outerOval':
+                player.dashesLeft = 1
                 player.isCollidingWithOval = True
                 if direction == 'down':
                     player.getPlayerVertices()

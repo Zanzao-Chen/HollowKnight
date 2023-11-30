@@ -43,6 +43,7 @@ class Player(Entity):
             self.looksAttacking = True
 
     def dash(self):
+        self.dashesLeft -= 1
         if self.direction == 'left':
             self.x -= self.dashDistance/self.dashDuration
             self.falling = False

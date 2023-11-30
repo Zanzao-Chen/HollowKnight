@@ -99,6 +99,7 @@ class Entity:
 
         self.spriteX = 20
         self.totalScrollX = 0
+        self.dashesLeft = 1
 
     def move(self, direction):
         if self.isCollidingWithAnything:
@@ -117,6 +118,7 @@ class Entity:
             self.y = newPosition
 
     def pogoJump(self):
+        self.dashesLeft = 1
         if self.falling and not self.isCollidingWithAnything and not self.isPogoingOnGround:
             self.isPogoingWhileJumping = True
         elif self.isCollidingWithAnything or self.isPogoingOnGround:
