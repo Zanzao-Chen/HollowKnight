@@ -459,13 +459,11 @@ def drawAttacks(app):
             if player.spriteCounterAttack < 4:
                 # drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
                 sprite = app.attackSprites[player.spriteCounterAttack]
-                print(player.spriteCounterAttack)
                 drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
                 player.spriteCounterAttack += 1
                 player.isAttacking = False
             else:
                 player.spriteCounterAttack = 0
-                print(4)
                 sprite = app.attackSprites[4]
                 drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
                 player.isAttacking = False
