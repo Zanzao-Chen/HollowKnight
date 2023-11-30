@@ -11,16 +11,16 @@
 # In my makePlayerVisible function, I directly used code with modifications from part 7, example sidescroller 2  
 
 # [3]
-# The game Hollow Knight by Team Cherry: I directly used their original player and terrain sprites
+# The game Hollow Knight by Team Cherry: I directly used their original player and terrain sprites from downloaded files in Steam
 
 # [4]
-# Background Clouds: https://pbs.twimg.com/media/Dv340GcWsAMt33a?format=jpg&name=4096x4096 
+# Background Clouds from Twitter: https://pbs.twimg.com/media/Dv340GcWsAMt33a?format=jpg&name=4096x4096 
 
 # [5]
 # The Spriter's Resource
 # Enemy sprite (crawlid): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/131852/   
 # Enemy sprite (charger): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/131848
-
+# Enemy sprite (flying): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/133898/
 # How to run: use ctrl+b on this file, with the other .py files in the same folder
 
 from cmu_graphics import *
@@ -53,10 +53,12 @@ def onAppStart(app):
     app.spriteCounterMove = 0 
     app.spriteCounterEnemy = 0
     app.spriteCounterCharger = 0
+    
     app.stepCounter1 = 0
     app.stepCounter2 = 0
     app.stepCounter3 = 0
     app.stepCounter4 = 0
+    app.stepCounter5 = 0
 
     app.hazardLimit = 700
     
@@ -68,9 +70,7 @@ def onAppStart(app):
     createTerrainSprites(app)
     createBackgroundSprites(app)
     createEnemySprites(app)
-
-
-
+    createAttackSprites(app)
 
 player = Player(500, 0, 40, 50)
 flat1 = Terrain(450, 480, 521, 50, 'Rectangle', 'Long') # width 521, height 50
@@ -293,6 +293,26 @@ def createEnemySprites(app):
         sprite = CMUImage(frameFlipped)
         app.chargingSprites.append(sprite)
 
+def createAttackSprites(app):
+    app.attackSprites = []
+    spritestrip = Image.open('playerAttacksLeftRight.png')
+    for i in range(4):
+        frame = spritestrip.crop((-300, 360*i, 1600, 360+360*i))
+        width, height = frame.size
+        frame = frame.resize((int(width/3), int(height/3)))
+        sprite = CMUImage(frame)
+        app.attackSprites.append(sprite)
+    app.attackSprites.append(sprite)
+
+    for i in range(4):
+        frame = spritestrip.crop((-300, 360*i, 1600, 360+360*i))
+        width, height = frame.size
+        frame = frame.resize((int(width/3), int(height/3)))
+        frameFlipped = ImageOps.mirror(frame)
+        sprite = CMUImage(frameFlipped)
+        app.attackSprites.append(sprite)
+    app.attackSprites.append(sprite)
+
 def createPlayerIdleSprites(app):
     app.idleSprites = []
     spritestrip = Image.open('playerSprites.png')
@@ -322,6 +342,7 @@ def createPlayerMovingSprites(app):
         frameFlipped = ImageOps.mirror(frame)
         sprite = CMUImage(frameFlipped)
         app.moveSpritesFlipped.append(sprite)
+
 
 def createPlayerDashingSprites(app):
     spritestrip = Image.open('dashSprites.png')
@@ -394,6 +415,7 @@ def moveSprites(app):
     app.stepCounter2 += 1
     app.stepCounter3 += 1
     app.stepCounter4 += 1
+    app.stepCounter5 += 1
     if app.stepCounter1>= 7:
         app.spriteCounterMove = (1 + app.spriteCounterMove) % len(app.moveSprites)
         app.stepCounter1 = 0 
@@ -406,6 +428,9 @@ def moveSprites(app):
     if app.stepCounter4 >= 5:
         app.spriteCounterCharger = (1 + app.spriteCounterCharger) % (len(app.chargingSprites)-4)
         app.stepCounter4 = 0
+    # if app.stepCounter5 >= 5:
+    #     player.spriteCounterAttack = (1 + player.spriteCounterAttack) % (len(app.attackSprites))
+    #     app.stepCounter5 = 0
 
 def recordPreviousPositions(app):
     player.previousPositions.append((player.x, -player.y))
@@ -419,8 +444,33 @@ def recordPreviousPositions(app):
 
 def drawAttacks(app):
     if player.isAttacking == True or player.looksAttacking == True:
-        drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
-        player.isAttacking = False
+        if player.attackDirection == 'right':
+            if player.spriteCounterAttack < 4:
+                # drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
+                sprite = app.attackSprites[player.spriteCounterAttack]
+                drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
+                player.spriteCounterAttack += 1
+                player.isAttacking = False
+            else:
+                player.spriteCounterAttack = 0
+                sprite = app.attackSprites[4]
+                drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
+                player.isAttacking = False
+            
+        elif player.attackDirection == 'left':
+            if player.spriteCounterAttack < 4:
+                # drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
+                sprite = app.attackSprites[player.spriteCounterAttack+5]
+                drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
+                player.spriteCounterAttack += 1
+                player.isAttacking = False
+            else:
+                player.spriteCounterAttack = 0
+                sprite = app.attackSprites[4+5]
+                drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
+                player.isAttacking = False
+        
+        
 
 def drawEnemies(app):
     for enemy in enemyList:

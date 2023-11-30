@@ -10,8 +10,8 @@ class Player(Entity):
             self.previousAttackTime = app.generalCounter
             self.attackX = self.x + (self.width if self.direction == 'right' else -self.attackWidth)
             if downwards == False and upwards == False:
-                self.attackWidth = self.width*5
-                self.attackHeight = self.height
+                # self.attackWidth = self.width*5
+                # self.attackHeight = self.height
                 self.attackY = self.y 
                 self.attackDirection = self.direction
                 self.isAttacking = True

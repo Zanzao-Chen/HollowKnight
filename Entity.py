@@ -26,8 +26,8 @@ class Entity:
         self.isAttacking = False
         self.looksAttacking = False
         self.previousAttackTime = 0
-        self.attackWidth = self.width*5
-        self.attackHeight = self.height
+        self.attackWidth = 350
+        self.attackHeight = 70
         
         self.maxHealth = 5
         self.currentHealth = 5
@@ -105,6 +105,7 @@ class Entity:
         self.doubleTimer = 0
         self.isKnockBack = True
         self.hazardLimit = 700
+        self.spriteCounterAttack = 0
 
     def move(self, direction):
         if self.isCollidingWithAnything:
