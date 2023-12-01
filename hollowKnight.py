@@ -18,7 +18,8 @@
 # Things that I did myself: cropping sprites, using mirror, flip, and size methods in PIL, which I learned through the PIL official documentation
 
 # [3]
-# The game Hollow Knight by Team Cherry: I directly used their original player and terrain sprites from downloaded files in Steam
+# Sprites from the game Hollow Knight by Team Cherry, directly taken from Steam game files
+# Includes: player sprites, terrain sprites, health bar sprites
 
 # [4]
 # Background Clouds from Twitter: https://pbs.twimg.com/media/Dv340GcWsAMt33a?format=jpg&name=4096x4096 
@@ -28,6 +29,7 @@
 # Enemy sprite (crawlid): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/131852/   
 # Enemy sprite (charger): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/131848
 # Enemy sprite (flying): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/133898/
+# Enemy sprite (ghost and fireball): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/133898/ 
 # Attack sprites (fire): https://www.spriters-resource.com/pc_computer/rpgmakervxace/sheet/100134 
 # How to run: use ctrl+b on this file, with the other .py files in the same folder
 
@@ -261,7 +263,7 @@ def drawPlayer(app):
 
 
 def createBackgroundSprites(app):
-    spritestrip = Image.open('background.png')
+    spritestrip = Image.open('Images\\background.png')
     app.backgroundSprites = []
     width, height = spritestrip.size
     frame = spritestrip.resize((int(width*0.8), int(height*0.8)))
@@ -270,7 +272,7 @@ def createBackgroundSprites(app):
 
 def createEnemySprites(app):
     app.enemySprites = []
-    spritestrip = Image.open('crawlid.png')
+    spritestrip = Image.open('Images\crawlid.png')
     frame = spritestrip.crop((5, 24, 118, 106))
     width, height = frame.size
     frame = frame.resize((int(width*0.5), int(height*0.5)))
@@ -290,7 +292,7 @@ def createEnemySprites(app):
     sprite = CMUImage(frame)
     app.enemySprites.append(sprite)
 
-    spritestrip = Image.open('charger.png')
+    spritestrip = Image.open('Images\charger.png')
     for i in range(7):
         frame = spritestrip.crop((2+i+63*i, 110, 63+63*i, 189))
         sprite = CMUImage(frame)
@@ -314,7 +316,7 @@ def createEnemySprites(app):
         app.chargingSprites.append(sprite)
     
     app.flySprites = []
-    spritestrip = Image.open('fly.png')
+    spritestrip = Image.open('Images\\fly.png')
     for i in range(5):
         frame = spritestrip.crop((5+168*i, 8, 168+168*i-5, 197))
         width, height = frame.size
@@ -323,7 +325,7 @@ def createEnemySprites(app):
         app.flySprites.append(sprite)
 
     app.ghostSprites = []
-    frame = Image.open('ghost.png')
+    frame = Image.open('Images\ghost.png')
     width, height = frame.size
     frame = frame.resize((int(width/2), int(height/2)))
     sprite = CMUImage(frame)
@@ -331,7 +333,7 @@ def createEnemySprites(app):
 
 def createAttackSprites(app):
     app.attackSprites = []
-    spritestrip = Image.open('playerAttacksLeftRight.png')
+    spritestrip = Image.open('Images\playerAttacksLeftRight.png')
     for i in range(4):
         frame = spritestrip.crop((-300, 360*i, 1600, 360+360*i))
         width, height = frame.size
@@ -350,7 +352,7 @@ def createAttackSprites(app):
     app.attackSprites.append(sprite)
 
     app.attackUpDownSprites = []
-    frame = Image.open('playerAttackDownwards.png')
+    frame = Image.open('Images\playerAttackDownwards.png')
     app.sprites = [ ]
     width, height = frame.size
     frame = frame.resize((int(width/5), int(height/5)))
@@ -362,14 +364,14 @@ def createAttackSprites(app):
 
 def createPlayerIdleSprites(app):
     app.idleSprites = []
-    spritestrip = Image.open('playerSprites.png')
+    spritestrip = Image.open('Images\playerSprites.png')
     i = 0
     frame = spritestrip.crop((0+79*i, 2, 79+79*i, 79))
     app.spriteWidth, app.spriteHeight = frame.size
     sprite = CMUImage(frame)
     app.idleSprites.append(sprite)
 
-    spritestrip = Image.open('playerSprites.png')
+    spritestrip = Image.open('Images\playerSprites.png')
     i = 0
     frame = spritestrip.crop((0+79*i, 2, 79+79*i, 79))
     frameFlipped = ImageOps.mirror(frame)
@@ -377,7 +379,7 @@ def createPlayerIdleSprites(app):
     app.idleSprites.append(sprite)
 
 def createPlayerMovingSprites(app):
-    spritestrip = Image.open('playerSprites.png')
+    spritestrip = Image.open('Images\playerSprites.png')
     app.moveSprites = []
     app.moveSpritesFlipped = []
     for i in range(1, 9):
@@ -392,7 +394,7 @@ def createPlayerMovingSprites(app):
 
 
 def createPlayerDashingSprites(app):
-    spritestrip = Image.open('dashSprites.png')
+    spritestrip = Image.open('Images\dashSprites.png')
     app.dashSprites = []
     for i in range(5):
         frame = spritestrip.crop((0+130*i, 520, 130+130*i, 640))
@@ -409,7 +411,7 @@ def createPlayerDashingSprites(app):
 def createPlayerDashingSpritesFinal(app):
     app.dashSpritesFinal = []
 
-    spritestrip = Image.open('Knight.png')
+    spritestrip = Image.open('Images\Knight.png')
     frame = spritestrip.crop((2624, 1550, 2624+164, 1664))
     width, height = frame.size
     factor = app.spriteHeight/height
@@ -423,14 +425,14 @@ def createPlayerDashingSpritesFinal(app):
 
 def createHealthSprites(app):
     app.healthSprites = []
-    frame = Image.open('health1.png')
+    frame = Image.open('Images\health1.png')
     width, height = frame.size
     factor = 0.20
     frame = frame.resize((int(width*factor), int(height*factor)))
     sprite = CMUImage(frame)
     app.healthSprites.append(sprite)
 
-    frame = Image.open('health2.png')
+    frame = Image.open('Images\health2.png')
     width, height = frame.size
     factor = 0.20
     frame = frame.resize((int(width*factor), int(height*factor)))
@@ -455,19 +457,19 @@ def drawTerrain(app):
 
 def createTerrainSprites(app):
     app.terrainSprites = []
-    spritestrip = Image.open('ground1.png')
+    spritestrip = Image.open('Images\ground1.png')
     width, height = spritestrip.size
     frame = spritestrip.resize((int(width/3), int(height/3)))
     sprite = CMUImage(frame)
     app.terrainSprites.append(sprite)
 
-    spritestrip = Image.open('squareGround.png')
+    spritestrip = Image.open('Images\squareGround.png')
     width, height = spritestrip.size
     frame = spritestrip.resize((int(width/5), int(height/5)))
     sprite = CMUImage(frame)
     app.terrainSprites.append(sprite)
 
-    spritestrip = Image.open('ovalGround2.png')
+    spritestrip = Image.open('Images\ovalGround2.png')
     width, height = spritestrip.size
     frame = spritestrip.resize((int(width/6), int(height/6)))
     sprite = CMUImage(frame)
@@ -671,9 +673,13 @@ def onStep(app):
     makePlayerVisible(app)
 
     if -player.y >= app.hazardLimit:
-        app.respawnPoints = [(200-player.totalScrollX, -200),
-                             (1200-player.totalScrollX, -200),
-                             (1650-player.totalScrollX, -200)]
+        app.respawnPoints = []
+        player.updateHealth(-1)
+        for terrain in terrainsList:
+            if terrain.type == 'Rectangle':
+                terrain.getTerrainVertices()
+                x, y = (terrain.leftX + terrain.rightX)/2, terrain.topY
+                app.respawnPoints.append((x, -y+500))
         respawnDistance = []
         for (x, y) in app.respawnPoints:
             respawnDistance.append(distance(x, y, player.x, player.y))
