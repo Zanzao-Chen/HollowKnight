@@ -72,12 +72,15 @@ def onAppStart(app):
     app.stepCounter4 = 0
     app.stepCounter5 = 0
     app.stepCounter6 = 0
-
+    
     app.hazardLimit = 700
 
     app.upgradePositions = [(1700, 300), (5000, 300)]
     app.upgradeStates = [True, True]
     app.powerUpRadius = 100
+    app.gameStarted = False
+    app.arrowsUp = True
+    app.displayTutorial = False
     
     createPlayerIdleSprites(app)
     createPlayerMovingSprites(app)
@@ -90,6 +93,7 @@ def onAppStart(app):
     createHealthSprites(app)
     createInstructionSprites(app)
     createUpgradeSprites(app)
+    createMainMenuSprites(app)
 
 player = Player(500, 0, 40, 50)
 flat1 = Terrain(450, 480, 521, 50, 'Rectangle', 'Long') # width 521, height 50
@@ -114,12 +118,12 @@ oval2 = Terrain(1300, 550, 300, 150, 'outerOval', 'Oval')
 oval3 = Terrain(1700, 550, 300, 150, 'outerOval', 'Oval')
 
 
-crawlid1 = GroundEnemy(700, 100, 50, 30, 50, 'crawlid', None)
-crawlid2 = GroundEnemy(800, 100, 50, 30, 50, 'crawlid', None)
+crawlid1 = GroundEnemy(700, -300, 50, 30, 50, 'crawlid', None)
+crawlid2 = GroundEnemy(800, -300, 50, 30, 50, 'crawlid', None)
 charger1 = GroundEnemy(3500, 100, 60, 74, 50, 'charger', None)
 fly1 = FlyEnemy(1000, -200, 50, 60, 50, 'fly', None)
 
-ghost1 = FlyEnemy(3000, 200, 100, 100, 50, 'ghost', None)
+ghost1 = FlyEnemy(4000, 200, 100, 100, 50, 'ghost', None)
 
 
 terrainsList = [flat1, flat2, flat3, flat4, flat5, flat6, flat7, flat8, flat9, flat10, 
@@ -143,7 +147,22 @@ def redrawAll(app):
     drawTestVertices(app)
     drawHealth(app)
     drawUpgradeAreas(app)
+    if app.gameStarted == False:
+        drawMainMenu(app)
 
+def drawMainMenu(app):
+    sprite = app.mainMenuSprite[0]
+    drawImage(sprite, 0, 0)
+    print(app.displayTutorial)
+    if app.arrowsUp == True:
+        drawPolygon(475, 380, 475, 400, 500, 390, fill = 'white')
+        drawPolygon(750, 380, 750, 400, 725, 390, fill = 'white')
+    if app.arrowsUp == False:
+        drawPolygon(485, 420, 485, 440, 510, 430, fill = 'white')
+        drawPolygon(740, 420, 740, 440, 715, 430, fill = 'white')
+    if app.displayTutorial == True:
+        sprite = app.mainMenuSprite[1]
+        drawImage(sprite, 0, 0)
 def drawInstructions(app):
     for i in range(len(app.upgradePositions)):
         x, y = app.upgradePositions[i]
@@ -303,6 +322,20 @@ def drawPlayer(app):
         elif player.direction == 'left':
             sprite = app.moveSpritesFlipped[app.spriteCounterMove]
             drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
+
+def createMainMenuSprites(app):
+    spritestrip = Image.open('Images\\mainMenu.png')
+    app.mainMenuSprite = []
+    width, height = spritestrip.size
+    frame = spritestrip.resize((int(width*0.75), int(height*0.75)))
+    sprite = CMUImage(frame)
+    app.mainMenuSprite.append(sprite)
+
+    spritestrip = Image.open('Images\\Tutorial.png')
+    width, height = spritestrip.size
+    frame = spritestrip.resize((int(width*0.7), int(height*0.7)))
+    sprite = CMUImage(frame)
+    app.mainMenuSprite.append(sprite)
 
 
 def drawUpgradeAreas(app):
@@ -676,345 +709,362 @@ def drawEnemies(app):
             
 
 def onKeyPress(app, key):
-    if player.freezeEverything == False:
-        if key == 'a':
-            player.direction = 'left'
-            player.move(-1)
-            for terrain in terrainsList:
-                implementLeftRightCollisions(player, terrain)
-        elif key == 'd':
-            player.direction = 'right'
-            player.move(+1)
-            for terrain in terrainsList:
-                implementLeftRightCollisions(player, terrain)
-        if key == 'o' and (player.jumping == False and player.isPogoing == False and player.dashing == False):
-            player.jumping = True
-        if key == 'o' and player.isCollidingWithAnything == False:
-            player.doubleJumping = True
-        if key == 'j' and player.dashing == False:
-            if player.holdingUp == True:
-                player.attack(upwards=True) 
-                player.holdingUp = False
-            elif player.holdingDown == True:
-                player.attack(downwards=True) 
-                player.holdingDown = False
-            else:
-                player.attack()
-            for enemy in enemyList:
-                if player.isAttacking == True and player.checkAttackColliding(enemy) == True and not enemy.isKilled:
-                    enemy.takeDamageEnemy(player.playerAttackDamage)
-                    player.attackKnockBack(enemy)
-                    if player.resource < 75:
-                        player.resource += player.resourceGain
-                    elif player.resource >= 75:
-                        player.resource = 100
-                    if enemy.type == 'charger':
-                        attackDirection = None
-                        if player.attackDirection == 'left':
-                            attackDirection = -1
-                        elif player.attackDirection == 'right':
-                            attackDirection = +1
-                        if attackDirection == enemy.direction:
-                            enemy.direction *= -1
-        if key == 'i' and player.dashesLeft > 0:
-            player.dashing = True
-        if key == 'p':
-            app.stepsPerSecond = 0.01
+    if app.displayTutorial == True and key == 'p':
+        app.displayTutorial = False
+        return
+    if app.displayTutorial == False:
+        if key == 'w':
+            app.arrowsUp = True
+        elif key == 's':
+            app.arrowsUp = False
+        if key == 'p' and app.arrowsUp == True:
+            app.gameStarted = True
+        if key == 'p' and app.arrowsUp == False:
+            app.displayTutorial = True
+    if app.gameStarted == True:
+        if player.freezeEverything == False:
+            if key == 'a':
+                player.direction = 'left'
+                player.move(-1)
+                for terrain in terrainsList:
+                    implementLeftRightCollisions(player, terrain)
+            elif key == 'd':
+                player.direction = 'right'
+                player.move(+1)
+                for terrain in terrainsList:
+                    implementLeftRightCollisions(player, terrain)
+            if key == 'o' and (player.jumping == False and player.isPogoing == False and player.dashing == False):
+                player.jumping = True
+            if key == 'o' and player.isCollidingWithAnything == False:
+                player.doubleJumping = True
+            if key == 'j' and player.dashing == False:
+                if player.holdingUp == True:
+                    player.attack(upwards=True) 
+                    player.holdingUp = False
+                elif player.holdingDown == True:
+                    player.attack(downwards=True) 
+                    player.holdingDown = False
+                else:
+                    player.attack()
+                for enemy in enemyList:
+                    if player.isAttacking == True and player.checkAttackColliding(enemy) == True and not enemy.isKilled:
+                        enemy.takeDamageEnemy(player.playerAttackDamage)
+                        player.attackKnockBack(enemy)
+                        if player.resource < 75:
+                            player.resource += player.resourceGain
+                        elif player.resource >= 75:
+                            player.resource = 100
+                        if enemy.type == 'charger':
+                            attackDirection = None
+                            if player.attackDirection == 'left':
+                                attackDirection = -1
+                            elif player.attackDirection == 'right':
+                                attackDirection = +1
+                            if attackDirection == enemy.direction:
+                                enemy.direction *= -1
+            if key == 'i' and player.dashesLeft > 0 and player.level > 0:
+                player.dashing = True
+            
 
-        if key == 'k' and player.resource >= player.resourceCost:
-            player.updateHealth(+1)
-            player.resource -= player.resourceCost
-        if key == 'space':
-            player.test = True
+            if key == 'k' and player.resource >= player.resourceCost:
+                player.updateHealth(+1)
+                player.resource -= player.resourceCost
+            # if key == 'p':
+            #     app.stepsPerSecond = 0.01
+            # if key == 'space':
+            #     player.test = True
 
 def onKeyHold(app, key):
-    if player.freezeEverything == False:
-        if 'a' in key:
-            player.move(-1)
-            player.direction = 'left'
-            for terrain in terrainsList:
-                implementLeftRightCollisions(player, terrain)
-        elif 'd' in key:
-            player.direction = 'right'
-            player.move(+1)
-            for terrain in terrainsList:
-                implementLeftRightCollisions(player, terrain)
-        if 'w' in key:
-            player.holdingUp = True
-        else:
-            player.holdingUp = False
-        if 's' in key:
-            player.holdingDown = True
-        else: 
-            player.holdingDown = False
-        if 'j' in key and player.dashing == False:
+    if app.gameStarted == True:
+        if player.freezeEverything == False:
+            if 'a' in key:
+                player.move(-1)
+                player.direction = 'left'
+                for terrain in terrainsList:
+                    implementLeftRightCollisions(player, terrain)
+            elif 'd' in key:
+                player.direction = 'right'
+                player.move(+1)
+                for terrain in terrainsList:
+                    implementLeftRightCollisions(player, terrain)
             if 'w' in key:
-                player.attack(upwards=True) 
-            elif 's' in key:
-                player.attack(downwards=True)
+                player.holdingUp = True
             else:
-                player.attack()
-            for enemy in enemyList:
-                if player.isAttacking == True and player.checkAttackColliding(enemy) == True:
-                    enemy.takeDamageEnemy(player.playerAttackDamage)
-                    player.attackKnockBack(enemy)
+                player.holdingUp = False
+            if 's' in key:
+                player.holdingDown = True
+            else: 
+                player.holdingDown = False
+            if 'j' in key and player.dashing == False:
+                if 'w' in key:
+                    player.attack(upwards=True) 
+                elif 's' in key:
+                    player.attack(downwards=True)
+                else:
+                    player.attack()
+                for enemy in enemyList:
+                    if player.isAttacking == True and player.checkAttackColliding(enemy) == True:
+                        enemy.takeDamageEnemy(player.playerAttackDamage)
+                        player.attackKnockBack(enemy)
                         
 def onKeyRelease(app, key):
-    if key == 'd' or key == 'a':
-        player.moving = False
-    if key == 'w':
-        player.holdingUp = False
-    elif key == 's':
-        player.holdingDown = False
+    if app.gameStarted == True:
+        if key == 'd' or key == 'a':
+            player.moving = False
+        if key == 'w':
+            player.holdingUp = False
+        elif key == 's':
+            player.holdingDown = False
 
 def onStep(app):
-    makePlayerVisible(app)
-    if -player.y >= app.hazardLimit:
-        app.respawnPoints = []
-        player.updateHealth(-1)
-        for terrain in terrainsList:
-            if terrain.type == 'Rectangle':
-                terrain.getTerrainVertices()
-                x, y = (terrain.leftX + terrain.rightX)/2, terrain.topY
-                app.respawnPoints.append((x, -y+500))
-        respawnDistance = []
-        for (x, y) in app.respawnPoints:
-            respawnDistance.append(distance(x, y, player.x, player.y))
-            
-        minimumDistance = min(respawnDistance)
-        index = respawnDistance.index(minimumDistance)
-        player.x, player.y = app.respawnPoints[index]
-
-    for enemy in enemyList:
-        if enemy.y >= app.hazardLimit:
-            del enemy
-        
-    if player.freezeEverything == True:
-        app.generalFreezeCounter += 1
-        if app.generalFreezeCounter - app.initialFreezeCounter > player.freezeDuration:
-            app.initialFreezeCounter = app.generalFreezeCounter
-            player.freezeEverything = False
-            player.stopFreeze = True
-       
-    
-    elif player.freezeEverything == False:
-
-        moveSprites(app)
-
-        
-        for i in range(len(app.upgradePositions)):
-            if app.upgradeStates[i] == True:
-                x, y = app.upgradePositions[i]
-                if distance(player.x, -player.y, x, y) <= app.powerUpRadius:
-                    app.upgradeStates[i] = False
-                    player.level += 1
-
-        for enemy in enemyList:
-            if enemy.type == 'charger':
-                chargeLeft, chargeRight = False, False
-                if enemy.direction == -1:
-                    if enemy.x - player.x > 0 and enemy.x - player.x < enemy.sightRange:
-                        enemy.charge()
-                        chargeLeft = True
-                elif enemy.direction == +1:
-                    if player.x - enemy.x > 0  and player.x - enemy.x < enemy.sightRange:
-                        enemy.charge()
-                        chargeRight = True
-                if chargeLeft == False and chargeRight == False:
-                    enemy.isCharging = False
-
-
-        app.generalCounter += 1
-        for enemy in enemyList:
-            (isColliding, direction, reference) = player.isCollidingRect(enemy)
-            if isColliding == True and not enemy.isKilled:
-                player.updateHealth(-1)
-                player.enemyCollisionDirection = direction
-                player.collidedEnemy = enemy
-                
-
-        if player.stopFreeze == True:
-            player.knockBack(player.enemyCollisionDirection)
-            player.stopFreeze = False
-
-
-        if player.falling == False:
-            app.generalFallingCounter += 1
-            if app.generalFallingCounter - app.initialFallingCounter > player.startFallDuration:
-                app.initialFallingCounter = app.generalFallingCounter
-                player.falling = True
-
-        if player.isInvincible == True:
-            app.generalInvincibleCounter += 1
-            if app.generalInvincibleCounter - app.initialInvincibleCounter > player.invincibleDuration:
-                app.initialInvincibleCounter = app.generalInvincibleCounter
-                player.isInvincible = False
-
-        if player.looksAttacking:
-            app.generalAttackCounter += 1
-            if app.generalAttackCounter - app.initialAttackCounter > player.attackAppearDuration:
-                app.initialAttackCounter = app.generalAttackCounter
-                player.looksAttacking = False
-        
-        if player.dashing == True:
-            app.generalDashingCounter+= 1
-            if app.generalDashingCounter - app.initialDashingCounter > player.dashDuration:
-                app.initialDashingCounter = app.generalDashingCounter
-                player.dashing = False
-
-
-
-        if player.dashing == True:
-            player.dash()
-
-        for enemy in enemyList:
-            if enemy.falling:
-                enemy.timer += 1
-                enemy.fall()
-
-        for terrain in terrainsList:
-            for enemy in enemyList:
-                isColliding = False
-                (isColliding, direction, reference) = enemy.checkColliding(terrain)
-                
-                if isColliding and terrain.type == 'Rectangle' and direction in ['left', 'right']:
-                    enemy.direction *= -1
-                if not isColliding and terrain.type == 'outerOval':
-                    enemy.isCollidingWithOval = False
-                if isColliding and terrain.type == 'Rectangle':
-                    if enemy.rotateAngle != 0:
-                        enemy.index += 0.05
-                        enemy.resetAngle()
-                    if direction == 'right':
-                        enemy.x = reference - enemy.width
-                    elif direction == 'left':
-                        enemy.x = reference
-                    elif direction == 'up':
-                        enemy.y = terrain.bottomY
-                    elif direction == 'down':
-                        enemy.y = -(reference - enemy.height)
-                        enemy.jumping = False
-                        
-                        enemy.positions = []
-                        enemy.timer = 0
-                elif isColliding and terrain.type == 'outerOval':
-                    enemy.isCollidingWithOval = True
-                    if direction == 'down':
-                        enemy.getPlayerVertices()
-                        getY = terrain.getY(enemy.orientationX)
-                        realY = enemy.getMiddleXFromOrientation(getY)
-                        enemy.y = -(realY - enemy.height)
-                        enemy.jumping = False
-                        enemy.positions = []
-                        enemy.timer = 0
-
-        for enemy in enemyList:
-            if enemy.type != 'fly' and enemy.type != 'ghost':
-                enemy.move()
-            elif enemy.type == 'fly':
-                if distance(enemy.x, enemy.y, player.x, player.y) <= enemy.sightRadius:
-                    enemy.move(player)
-                else:
-                    x = enemy.initialX - player.totalScrollX
-                    y = enemy.initialY
-                    enemy.moveRandom(x, y)
-            elif enemy.type == 'ghost':
-                if abs(enemy.x-player.x) <= enemy.spawnDistance:
-                    if enemy.teleportTimes == 0:
-                        enemy.teleport(player)
-                        enemy.teleportTimes += 1
-                    if enemy.health < enemy.initialHealth/2 and enemy.teleportTimes == 1:
-                        enemy.teleport(player)
-                        enemy.teleportTimes += 1
-                if enemy.startShootFireball == False and enemy.teleportTimes != 0:
-                    
-                    enemy.fireballX, enemy.fireballY = enemy.x-player.totalScrollX, enemy.y
-                    enemy.finalFireballX, enemy.finalFireballY = player.x-player.totalScrollX, player.y
-                    enemy.startShootFireball = True
-                    
-
-        for enemy in enemyList:
-            if enemy.type == 'ghost' and enemy.startShootFireball == True:
-                enemy.shootFireball(enemy.finalFireballX, enemy.finalFireballY)
-
-
-        for enemy in enemyList:
+    if app.gameStarted:
+        makePlayerVisible(app)
+        if -player.y >= app.hazardLimit:
+            app.respawnPoints = []
+            player.updateHealth(-1)
             for terrain in terrainsList:
-                implementLeftRightCollisions(enemy, terrain)
+                if terrain.type == 'Rectangle':
+                    terrain.getTerrainVertices()
+                    x, y = (terrain.leftX + terrain.rightX)/2, terrain.topY
+                    app.respawnPoints.append((x, -y+500))
+            respawnDistance = []
+            for (x, y) in app.respawnPoints:
+                respawnDistance.append(distance(x, y, player.x, player.y))
+                
+            minimumDistance = min(respawnDistance)
+            index = respawnDistance.index(minimumDistance)
+            player.x, player.y = app.respawnPoints[index]
 
-        if player.falling:
-            player.timer += 1
-            player.timerPogo += 1
-            player.fall()
-        if player.jumping:
-            player.timer += 1
-            player.jump()
-        if player.doubleJumping:
-            player.doubleTimer += 1
-            player.doubleJump()
-        if player.isPogoing:
-            player.timerPogo += 1
-            player.pogoJump()
-        if player.isPogoingWhileJumping:
-            player.timerPogoJumping += 1
-            player.pogoJumpWhileJumping()
-        player.terrainCollisionsDict = dict()
+        for enemy in enemyList:
+            if enemy.y >= app.hazardLimit:
+                del enemy
+            
+        if player.freezeEverything == True:
+            app.generalFreezeCounter += 1
+            if app.generalFreezeCounter - app.initialFreezeCounter > player.freezeDuration:
+                app.initialFreezeCounter = app.generalFreezeCounter
+                player.freezeEverything = False
+                player.stopFreeze = True
         
-        for terrain in terrainsList:
-            isColliding = False
-            (isColliding, direction, reference) = player.checkColliding(terrain)
-            player.terrainCollisionsDict[terrain] = isColliding
-            if not isColliding and terrain.type == 'outerOval':
-                player.isCollidingWithOval = False
-            elif isColliding and terrain.type == 'Rectangle':
-                player.isCollidingWithRect = True
-                if player.rotateAngle != 0:
-                    player.index += 0.05
-                    player.resetAngle()
-                if direction == 'right':
-                    player.x = reference - player.width
-                elif direction == 'left':
-                    player.x = reference
-                elif direction == 'up':
-                    player.y = terrain.bottomY
-                elif direction == 'down':
+        
+        elif player.freezeEverything == False:
+
+            moveSprites(app)
+
+            
+            for i in range(len(app.upgradePositions)):
+                if app.upgradeStates[i] == True:
+                    x, y = app.upgradePositions[i]
+                    if distance(player.x, -player.y, x, y) <= app.powerUpRadius+40: # compensates for player width
+                        app.upgradeStates[i] = False
+                        player.level += 1
+
+            for enemy in enemyList:
+                if enemy.type == 'charger':
+                    chargeLeft, chargeRight = False, False
+                    if enemy.direction == -1:
+                        if enemy.x - player.x > 0 and enemy.x - player.x < enemy.sightRange:
+                            enemy.charge()
+                            chargeLeft = True
+                    elif enemy.direction == +1:
+                        if player.x - enemy.x > 0  and player.x - enemy.x < enemy.sightRange:
+                            enemy.charge()
+                            chargeRight = True
+                    if chargeLeft == False and chargeRight == False:
+                        enemy.isCharging = False
+
+
+            app.generalCounter += 1
+            for enemy in enemyList:
+                (isColliding, direction, reference) = player.isCollidingRect(enemy)
+                if isColliding == True and not enemy.isKilled:
+                    player.updateHealth(-1)
+                    player.enemyCollisionDirection = direction
+                    player.collidedEnemy = enemy
+                    
+
+            if player.stopFreeze == True:
+                player.knockBack(player.enemyCollisionDirection)
+                player.stopFreeze = False
+
+
+            if player.falling == False:
+                app.generalFallingCounter += 1
+                if app.generalFallingCounter - app.initialFallingCounter > player.startFallDuration:
+                    app.initialFallingCounter = app.generalFallingCounter
+                    player.falling = True
+
+            if player.isInvincible == True:
+                app.generalInvincibleCounter += 1
+                if app.generalInvincibleCounter - app.initialInvincibleCounter > player.invincibleDuration:
+                    app.initialInvincibleCounter = app.generalInvincibleCounter
+                    player.isInvincible = False
+
+            if player.looksAttacking:
+                app.generalAttackCounter += 1
+                if app.generalAttackCounter - app.initialAttackCounter > player.attackAppearDuration:
+                    app.initialAttackCounter = app.generalAttackCounter
+                    player.looksAttacking = False
+            
+            if player.dashing == True:
+                app.generalDashingCounter+= 1
+                if app.generalDashingCounter - app.initialDashingCounter > player.dashDuration:
+                    app.initialDashingCounter = app.generalDashingCounter
+                    player.dashing = False
+
+
+
+            if player.dashing == True:
+                player.dash()
+
+            for enemy in enemyList:
+                if enemy.falling:
+                    enemy.timer += 1
+                    enemy.fall()
+
+            for terrain in terrainsList:
+                for enemy in enemyList:
+                    isColliding = False
+                    (isColliding, direction, reference) = enemy.checkColliding(terrain)
+                    
+                    if isColliding and terrain.type == 'Rectangle' and direction in ['left', 'right']:
+                        enemy.direction *= -1
+                    if not isColliding and terrain.type == 'outerOval':
+                        enemy.isCollidingWithOval = False
+                    if isColliding and terrain.type == 'Rectangle':
+                        if enemy.rotateAngle != 0:
+                            enemy.index += 0.05
+                            enemy.resetAngle()
+                        if direction == 'right':
+                            enemy.x = reference - enemy.width
+                        elif direction == 'left':
+                            enemy.x = reference
+                        elif direction == 'up':
+                            enemy.y = terrain.bottomY
+                        elif direction == 'down':
+                            enemy.y = -(reference - enemy.height)
+                            enemy.jumping = False
+                            
+                            enemy.positions = []
+                            enemy.timer = 0
+                    elif isColliding and terrain.type == 'outerOval':
+                        enemy.isCollidingWithOval = True
+                        if direction == 'down':
+                            enemy.getPlayerVertices()
+                            getY = terrain.getY(enemy.orientationX)
+                            realY = enemy.getMiddleXFromOrientation(getY)
+                            enemy.y = -(realY - enemy.height)
+                            enemy.jumping = False
+                            enemy.positions = []
+                            enemy.timer = 0
+
+            for enemy in enemyList:
+                if enemy.type != 'fly' and enemy.type != 'ghost':
+                    enemy.move()
+                elif enemy.type == 'fly':
+                    if distance(enemy.x, enemy.y, player.x, player.y) <= enemy.sightRadius:
+                        enemy.move(player)
+                    else:
+                        x = enemy.initialX - player.totalScrollX
+                        y = enemy.initialY
+                        enemy.moveRandom(x, y)
+                elif enemy.type == 'ghost':
+                    if abs(enemy.x-player.x) <= enemy.spawnDistance:
+                        if enemy.teleportTimes == 0:
+                            enemy.teleport(player)
+                            enemy.teleportTimes += 1
+                        if enemy.health < enemy.initialHealth/2 and enemy.teleportTimes == 1:
+                            enemy.teleport(player)
+                            enemy.teleportTimes += 1
+                    if enemy.startShootFireball == False and enemy.teleportTimes != 0:
+                        
+                        enemy.fireballX, enemy.fireballY = enemy.x-player.totalScrollX, enemy.y
+                        enemy.finalFireballX, enemy.finalFireballY = player.x-player.totalScrollX, player.y
+                        enemy.startShootFireball = True
+                        
+
+            for enemy in enemyList:
+                if enemy.type == 'ghost' and enemy.startShootFireball == True:
+                    enemy.shootFireball(enemy.finalFireballX, enemy.finalFireballY)
+
+
+            for enemy in enemyList:
+                for terrain in terrainsList:
+                    implementLeftRightCollisions(enemy, terrain)
+
+            if player.falling:
+                player.timer += 1
+                player.timerPogo += 1
+                player.fall()
+            if player.jumping:
+                player.timer += 1
+                player.jump()
+            if player.doubleJumping and player.level > 1:
+                player.doubleTimer += 1
+                player.doubleJump()
+            if player.isPogoing:
+                player.timerPogo += 1
+                player.pogoJump()
+            if player.isPogoingWhileJumping:
+                player.timerPogoJumping += 1
+                player.pogoJumpWhileJumping()
+            player.terrainCollisionsDict = dict()
+            
+            for terrain in terrainsList:
+                isColliding = False
+                (isColliding, direction, reference) = player.checkColliding(terrain)
+                player.terrainCollisionsDict[terrain] = isColliding
+                if not isColliding and terrain.type == 'outerOval':
+                    player.isCollidingWithOval = False
+                elif isColliding and terrain.type == 'Rectangle':
+                    player.isCollidingWithRect = True
+                    if player.rotateAngle != 0:
+                        player.index += 0.05
+                        player.resetAngle()
+                    if direction == 'right':
+                        player.x = reference - player.width
+                    elif direction == 'left':
+                        player.x = reference
+                    elif direction == 'up':
+                        player.y = terrain.bottomY
+                    elif direction == 'down':
+                        player.dashesLeft = 1
+                        player.y = -(reference - player.height)
+                        player.jumping = False
+                        player.doubleJumping = False
+                        player.doubleTimer = 0
+                        player.isPogoing = False
+                        player.isPogoingOnGround = False
+                        player.isPogoingWhileJumping = False
+                        player.timerPogoJumping = 0
+                        player.positions = []
+                        player.timer = 0
+                        player.timerPogo = 0
+                        player.isknockBack = True
+                elif isColliding and terrain.type == 'outerOval':
                     player.dashesLeft = 1
-                    player.y = -(reference - player.height)
-                    player.jumping = False
-                    player.doubleJumping = False
-                    player.doubleTimer = 0
-                    player.isPogoing = False
-                    player.isPogoingOnGround = False
-                    player.isPogoingWhileJumping = False
-                    player.timerPogoJumping = 0
-                    player.positions = []
-                    player.timer = 0
-                    player.timerPogo = 0
-                    player.isknockBack = True
-            elif isColliding and terrain.type == 'outerOval':
-                player.dashesLeft = 1
-                player.isCollidingWithOval = True
-                if direction == 'down':
-                    player.getPlayerVertices()
-                    getY = terrain.getY(player.orientationX)
-                    realY = player.getMiddleXFromOrientation(getY)
-                    player.y = -(realY - player.height)
-                    player.jumping = False
-                    player.doubleJumping = False
-                    player.isPogoing = False
-                    player.isPogoingOnGround = False
-                    player.positions = []
-                    player.timer = 0
-                    player.timerPogo = 0
-                    player.isPogoingWhileJumping = False
-                    player.timerPogoJumping = 0
-                    player.doubleTimer = 0
-                    player.isknockBack = True
-    player.isCollidingWithAnything = False
-    
-    for key in player.terrainCollisionsDict:
-        if player.terrainCollisionsDict[key] == True:
-            player.isCollidingWithAnything = True
+                    player.isCollidingWithOval = True
+                    if direction == 'down':
+                        player.getPlayerVertices()
+                        getY = terrain.getY(player.orientationX)
+                        realY = player.getMiddleXFromOrientation(getY)
+                        player.y = -(realY - player.height)
+                        player.jumping = False
+                        player.doubleJumping = False
+                        player.isPogoing = False
+                        player.isPogoingOnGround = False
+                        player.positions = []
+                        player.timer = 0
+                        player.timerPogo = 0
+                        player.isPogoingWhileJumping = False
+                        player.timerPogoJumping = 0
+                        player.doubleTimer = 0
+                        player.isknockBack = True
+        player.isCollidingWithAnything = False
+        
+        for key in player.terrainCollisionsDict:
+            if player.terrainCollisionsDict[key] == True:
+                player.isCollidingWithAnything = True
 
 
 
