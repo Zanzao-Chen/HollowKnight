@@ -44,6 +44,7 @@ from PIL import Image, ImageOps
 
 def onAppStart(app):
     app.scrollX = 0
+    
     app.scrollMargin = 400
     app.stepsPerSecond = 30
     app.generalAttackCounter = 0
@@ -73,7 +74,10 @@ def onAppStart(app):
     app.stepCounter6 = 0
 
     app.hazardLimit = 700
-    
+
+    app.upgradePositions = [(1700, 300), (5000, 300)]
+    app.upgradeStates = [True, True]
+    app.powerUpRadius = 100
     
     createPlayerIdleSprites(app)
     createPlayerMovingSprites(app)
@@ -85,35 +89,43 @@ def onAppStart(app):
     createAttackSprites(app)
     createHealthSprites(app)
     createInstructionSprites(app)
+    createUpgradeSprites(app)
 
 player = Player(500, 0, 40, 50)
 flat1 = Terrain(450, 480, 521, 50, 'Rectangle', 'Long') # width 521, height 50
 flat2 = Terrain(0, 450, 521, 50, 'Rectangle', 'Long')
 flat3 = Terrain(900, 450, 521, 50, 'Rectangle', 'Long')
 flat4 = Terrain(1400, 450, 521, 50, 'Rectangle', 'Long')
-flat5 = Terrain(2400, 430, 90, 90, 'Rectangle', 'Square') # width 90, height 90
-flat6 = Terrain(2600, 460, 90, 90, 'Rectangle', 'Square') # width 90, height 90
+flat4 = Terrain(1500, 450, 521, 50, 'Rectangle', 'Long')
+flat5 = Terrain(2100, 430, 90, 90, 'Rectangle', 'Square') # width 90, height 90
+flat6 = Terrain(2300, 460, 90, 90, 'Rectangle', 'Square') 
+flat7 = Terrain(2500, 450, 90, 90, 'Rectangle', 'Square') 
+flat8 = Terrain(2700, 420, 90, 90, 'Rectangle', 'Square') 
+flat9 = Terrain(2900, 450, 521, 50, 'Rectangle', 'Long')
+flat10 = Terrain(3300, 450, 521, 50, 'Rectangle', 'Long')
+flat11 = Terrain(3700, 450, 521, 50, 'Rectangle', 'Long')
+flat12 = Terrain(2900, 370, 90, 90, 'Rectangle', 'Square') 
+flat13 = Terrain(4000, 370, 90, 90, 'Rectangle', 'Square')
+flat14 = Terrain(4000, 450, 521, 50, 'Rectangle', 'Long')
+flat15 = Terrain(4500, 450, 521, 50, 'Rectangle', 'Long')
+
 oval1 = Terrain(1500, 500, 300, 150, 'outerOval', 'Oval')
 oval2 = Terrain(1300, 550, 300, 150, 'outerOval', 'Oval')
 oval3 = Terrain(1700, 550, 300, 150, 'outerOval', 'Oval')
 
-powerUp1 = powerUp(500, 230, 50, 50, 'Rectangle', 1)
-powerUp2 = powerUp(800, 230, 50, 50, 'Rectangle', 2)
-powerUp3 = powerUp(1000, 230, 50, 50, 'Rectangle', 3)
-
 
 crawlid1 = GroundEnemy(700, 100, 50, 30, 50, 'crawlid', None)
 crawlid2 = GroundEnemy(800, 100, 50, 30, 50, 'crawlid', None)
-charger1 = GroundEnemy(900, 100, 60, 74, 50, 'charger', None)
+charger1 = GroundEnemy(3500, 100, 60, 74, 50, 'charger', None)
 fly1 = FlyEnemy(1000, -200, 50, 60, 50, 'fly', None)
 
-ghost1 = FlyEnemy(50, 200, 100, 100, 50, 'ghost', None)
+ghost1 = FlyEnemy(3000, 200, 100, 100, 50, 'ghost', None)
 
 
-terrainsList = [flat1, flat2, flat3, flat4, flat5, flat6, oval2, oval3, oval1]
+terrainsList = [flat1, flat2, flat3, flat4, flat5, flat6, flat7, flat8, flat9, flat10, 
+                flat11, flat12, flat13, flat14, flat15,
+                oval2, oval3, oval1]
 enemyList = [crawlid1, crawlid2, charger1, fly1, ghost1]
-
-powerUpList = [powerUp1, powerUp2, powerUp3]
 
 
 def redrawAll(app):
@@ -130,19 +142,26 @@ def redrawAll(app):
     drawAttacks(app)
     drawTestVertices(app)
     drawHealth(app)
+    drawUpgradeAreas(app)
 
 def drawInstructions(app):
-    opacityFirst = 100-abs((player.x-(400-player.totalScrollX)))*0.2
+    for i in range(len(app.upgradePositions)):
+        x, y = app.upgradePositions[i]
+        if app.upgradeStates[i] == False:
+            drawStaticInstructions(x, y, app.instructionSprites[i+1])
+
+def drawStaticInstructions(x, y, sprite):
+    opacityFirst = 100-abs((player.x-(x)))*0.2
     if opacityFirst > 100:
         opacityFirst = 100
     elif opacityFirst < 0:
         opacityFirst = 0
+    drawImage(sprite, x, y, opacity = opacityFirst, align='center')
 
-    sprite = app.instructionSprites[0]
-    drawImage(sprite, 400-player.totalScrollX, 250, opacity = opacityFirst, align='center')
+
 def drawBackground(app):
     sprite = app.backgroundSprites[0]
-    drawImage(sprite, 0, 0)
+    drawImage(sprite, player.backgroundX, 0)
 
 def sideScroll(app):
     if player.moving or player.dashing:
@@ -152,6 +171,13 @@ def sideScroll(app):
             terrain.x -= app.scrollX
         player.x -= app.scrollX
         player.totalScrollX += app.scrollX
+        if player.totalScrollX > 0:
+            player.backgroundX -= app.scrollX/5
+        for i in range(len(app.upgradePositions)):
+            x, y = app.upgradePositions[i]
+            x -= app.scrollX
+            app.upgradePositions[i] = x, y
+        
 
 def makePlayerVisible(app):
     player.getPlayerVertices()
@@ -237,6 +263,7 @@ def drawHealth(app):
     drawRect(100, 170, 159, 20, fill=None, border='black')
     drawRect(259, 170, 159, 20, fill=None, border='black')
 
+
 def drawPlayer(app):
     if player.dashing == True:
         player.dashingPositions.append((player.x, player.y, player.rotateAngle))
@@ -277,6 +304,22 @@ def drawPlayer(app):
             sprite = app.moveSpritesFlipped[app.spriteCounterMove]
             drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
 
+
+def drawUpgradeAreas(app):
+    sprite =  app.upgradeSprites[0]
+    for i in range(len(app.upgradePositions)):
+        x, y = app.upgradePositions[i]
+        if app.upgradeStates[i] == True:
+            drawImage(sprite, x, y, align = 'center')
+            # drawCircle(x, y, app.powerUpRadius, fill = 'red')
+
+def createUpgradeSprites(app):
+    spritestrip = Image.open('Images\\powerup.png')
+    app.upgradeSprites = []
+    width, height = spritestrip.size
+    frame = spritestrip.resize((int(width*0.8), int(height*0.8)))
+    sprite = CMUImage(frame)
+    app.upgradeSprites.append(sprite)
 
 def createBackgroundSprites(app):
     spritestrip = Image.open('Images\\background.png')
@@ -458,6 +501,20 @@ def createHealthSprites(app):
 def createInstructionSprites(app):
     app.instructionSprites = []
     frame = Image.open('Images\Instructions1.png')
+    width, height = frame.size
+    factor = 0.10
+    frame = frame.resize((int(width*factor), int(height*factor)))
+    sprite = CMUImage(frame)
+    app.instructionSprites.append(sprite)
+
+    frame = Image.open('Images\Instructions2.png')
+    width, height = frame.size
+    factor = 0.10
+    frame = frame.resize((int(width*factor), int(height*factor)))
+    sprite = CMUImage(frame)
+    app.instructionSprites.append(sprite)
+
+    frame = Image.open('Images\Instructions3.png')
     width, height = frame.size
     factor = 0.10
     frame = frame.resize((int(width*factor), int(height*factor)))
@@ -651,6 +708,14 @@ def onKeyPress(app, key):
                         player.resource += player.resourceGain
                     elif player.resource >= 75:
                         player.resource = 100
+                    if enemy.type == 'charger':
+                        attackDirection = None
+                        if player.attackDirection == 'left':
+                            attackDirection = -1
+                        elif player.attackDirection == 'right':
+                            attackDirection = +1
+                        if attackDirection == enemy.direction:
+                            enemy.direction *= -1
         if key == 'i' and player.dashesLeft > 0:
             player.dashing = True
         if key == 'p':
@@ -735,6 +800,14 @@ def onStep(app):
     elif player.freezeEverything == False:
 
         moveSprites(app)
+
+        
+        for i in range(len(app.upgradePositions)):
+            if app.upgradeStates[i] == True:
+                x, y = app.upgradePositions[i]
+                if distance(player.x, -player.y, x, y) <= app.powerUpRadius:
+                    app.upgradeStates[i] = False
+                    player.level += 1
 
         for enemy in enemyList:
             if enemy.type == 'charger':

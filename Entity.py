@@ -22,6 +22,7 @@ class Entity:
         self.rotateAngle = 0
         self.index = 1
         self.direction = 'right'
+        self.backgroundX = 0
         
         self.isAttacking = False
         self.looksAttacking = False
@@ -209,7 +210,6 @@ class Entity:
 
     def knockBack(self, collisionDirection):
         if not -self.y >= self.hazardLimit - 100:
-            print(1)
             self.y += self.knockBackY
             if collisionDirection == 'right':
                 self.x -= self.knockBackX
