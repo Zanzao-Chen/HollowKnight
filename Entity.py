@@ -35,7 +35,7 @@ class Entity:
         self.healthList = [True]*self.maxHealth
 
         self.healthX = 100 # center of left-most health circle
-        self.healthXInterval = 30
+        self.healthXInterval = 70
         self.healthY = 100 
         self.healthRadius = 10
         self.yesHealthColor = 'black'

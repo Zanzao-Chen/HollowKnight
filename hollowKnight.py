@@ -82,6 +82,7 @@ def onAppStart(app):
     createBackgroundSprites(app)
     createEnemySprites(app)
     createAttackSprites(app)
+    createHealthSprites(app)
 
 player = Player(500, 0, 40, 50)
 flat1 = Terrain(450, 480, 521, 50, 'Rectangle', 'Long') # width 521, height 50
@@ -210,9 +211,13 @@ def drawTestVectors(app):
 def drawHealth(app):
     for i in range(len(player.healthList)):
         if player.healthList[i] == True:
-            drawCircle(player.healthX+player.healthXInterval*i, player.healthY, player.healthRadius, fill=player.yesHealthColor)
+            sprite = app.healthSprites[0]
+            drawImage(sprite, player.healthX+player.healthXInterval*i, player.healthY)
+            # drawCircle(player.healthX+player.healthXInterval*i, player.healthY, player.healthRadius, fill=player.yesHealthColor)
         else:
-            drawCircle(player.healthX+player.healthXInterval*i, player.healthY, player.healthRadius, fill=player.noHealthColor)
+            sprite = app.healthSprites[1]
+            drawImage(sprite, player.healthX+player.healthXInterval*i, player.healthY)
+
 
 def drawPlayer(app):
     if player.dashing == True:
@@ -415,6 +420,22 @@ def createPlayerDashingSpritesFinal(app):
     frame = ImageOps.mirror(frame)
     sprite = CMUImage(frame)
     app.dashSpritesFinal.append(sprite)
+
+def createHealthSprites(app):
+    app.healthSprites = []
+    frame = Image.open('health1.png')
+    width, height = frame.size
+    factor = 0.20
+    frame = frame.resize((int(width*factor), int(height*factor)))
+    sprite = CMUImage(frame)
+    app.healthSprites.append(sprite)
+
+    frame = Image.open('health2.png')
+    width, height = frame.size
+    factor = 0.20
+    frame = frame.resize((int(width*factor), int(height*factor)))
+    sprite = CMUImage(frame)
+    app.healthSprites.append(sprite)
 
 def drawTerrain(app):
     for terrain in terrainsList:
