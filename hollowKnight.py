@@ -84,6 +84,7 @@ def onAppStart(app):
     createEnemySprites(app)
     createAttackSprites(app)
     createHealthSprites(app)
+    createInstructionSprites(app)
 
 player = Player(500, 0, 40, 50)
 flat1 = Terrain(450, 480, 521, 50, 'Rectangle', 'Long') # width 521, height 50
@@ -131,14 +132,14 @@ def redrawAll(app):
     drawHealth(app)
 
 def drawInstructions(app):
-    opacityFirst = 100-abs((player.x-(400-player.totalScrollX)))*0.3
+    opacityFirst = 100-abs((player.x-(400-player.totalScrollX)))*0.2
     if opacityFirst > 100:
         opacityFirst = 100
     elif opacityFirst < 0:
         opacityFirst = 0
-    drawLabel('O is jump, J is attack', 400-player.totalScrollX, 250, size=20, fill='blue', opacity = opacityFirst)
-    drawLabel('Use AWDS to move and control attack direction', 400-player.totalScrollX, 300, fill = 'blue', size=20, opacity=opacityFirst)
 
+    sprite = app.instructionSprites[0]
+    drawImage(sprite, 400-player.totalScrollX, 250, opacity = opacityFirst, align='center')
 def drawBackground(app):
     sprite = app.backgroundSprites[0]
     drawImage(sprite, 0, 0)
@@ -218,7 +219,23 @@ def drawHealth(app):
         else:
             sprite = app.healthSprites[1]
             drawImage(sprite, player.healthX+player.healthXInterval*i, player.healthY)
-
+    
+    
+    
+    if player.resource > 0:
+        if player.resource >= 50:
+            color1 = 'white'
+        else:
+            color1 = 'grey'
+        drawRect(100, 170, int(159*(player.resource/50)), 20, fill=color1)
+    if player.resource > 50:
+        if player.resource == 100:
+            color2 = 'white'
+        else:
+            color2 = 'grey'
+        drawRect(259, 170, int(159*((player.resource-50)/50)), 20, fill=color2)
+    drawRect(100, 170, 159, 20, fill=None, border='black')
+    drawRect(259, 170, 159, 20, fill=None, border='black')
 
 def drawPlayer(app):
     if player.dashing == True:
@@ -438,6 +455,15 @@ def createHealthSprites(app):
     sprite = CMUImage(frame)
     app.healthSprites.append(sprite)
 
+def createInstructionSprites(app):
+    app.instructionSprites = []
+    frame = Image.open('Images\Instructions1.png')
+    width, height = frame.size
+    factor = 0.10
+    frame = frame.resize((int(width*factor), int(height*factor)))
+    sprite = CMUImage(frame)
+    app.instructionSprites.append(sprite)
+
 def drawTerrain(app):
     for terrain in terrainsList:
         if terrain.type == 'Rectangle':
@@ -621,10 +647,18 @@ def onKeyPress(app, key):
                 if player.isAttacking == True and player.checkAttackColliding(enemy) == True and not enemy.isKilled:
                     enemy.takeDamageEnemy(player.playerAttackDamage)
                     player.attackKnockBack(enemy)
+                    if player.resource < 75:
+                        player.resource += player.resourceGain
+                    elif player.resource >= 75:
+                        player.resource = 100
         if key == 'i' and player.dashesLeft > 0:
             player.dashing = True
         if key == 'p':
             app.stepsPerSecond = 0.01
+
+        if key == 'k' and player.resource >= player.resourceCost:
+            player.updateHealth(+1)
+            player.resource -= player.resourceCost
         if key == 'space':
             player.test = True
 

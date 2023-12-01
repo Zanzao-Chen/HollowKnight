@@ -107,6 +107,10 @@ class Entity:
         self.hazardLimit = 700
         self.spriteCounterAttack = 0
 
+        self.resource = 0
+        self.resourceGain = 10
+        self.resourceCost = 50
+
     def move(self, direction):
         if self.isCollidingWithAnything:
             self.moving =True
@@ -197,6 +201,10 @@ class Entity:
             self.healthList = [True]*self.currentHealth + [False]*self.damageTook
             self.isInvincible = True
             self.freezeEverything = True
+        elif self.currentHealth >= 1 and amount > 0 and self.currentHealth != self.maxHealth:
+            self.currentHealth += amount
+            self.damageTook = self.maxHealth - self.currentHealth
+            self.healthList = [True]*self.currentHealth + [False]*self.damageTook
         
 
     def knockBack(self, collisionDirection):
