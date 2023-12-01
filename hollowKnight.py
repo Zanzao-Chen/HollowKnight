@@ -45,7 +45,6 @@ from PIL import Image, ImageOps
 def onAppStart(app):
     app.scrollX = 0
     app.scrollMargin = 400
-
     app.stepsPerSecond = 30
     app.generalAttackCounter = 0
     app.previousAttackTime = 0
@@ -671,7 +670,6 @@ def onKeyRelease(app, key):
 
 def onStep(app):
     makePlayerVisible(app)
-
     if -player.y >= app.hazardLimit:
         app.respawnPoints = []
         player.updateHealth(-1)
