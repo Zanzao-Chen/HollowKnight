@@ -10,6 +10,13 @@
 # https://www.cs.cmu.edu/~112-f22/notes/notes-animations-part4.html
 # In my makePlayerVisible function, I directly used code with modifications from part 7, example sidescroller 2  
 
+
+# [3] 
+# Lecture demos 11/21 on sprite strips
+# https://piazza.com/class/lkq6ivek5cg1bc/post/2231
+# I created and animated all the sprites in my game using the code on sprite strips in the demos
+# Things that I did myself: cropping sprites, using mirror, flip, and size methods in PIL, which I learned through the PIL official documentation
+
 # [3]
 # The game Hollow Knight by Team Cherry: I directly used their original player and terrain sprites from downloaded files in Steam
 
@@ -21,8 +28,10 @@
 # Enemy sprite (crawlid): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/131852/   
 # Enemy sprite (charger): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/131848
 # Enemy sprite (flying): https://www.spriters-resource.com/pc_computer/hollowknight/sheet/133898/
+# Attack sprites (fire): https://www.spriters-resource.com/pc_computer/rpgmakervxace/sheet/100134 
 # How to run: use ctrl+b on this file, with the other .py files in the same folder
 
+from random import *
 from cmu_graphics import *
 from Player import *
 from Terrain import *
@@ -53,12 +62,14 @@ def onAppStart(app):
     app.spriteCounterMove = 0 
     app.spriteCounterEnemy = 0
     app.spriteCounterCharger = 0
+    app.spriteCounterFly = 0
     
     app.stepCounter1 = 0
     app.stepCounter2 = 0
     app.stepCounter3 = 0
     app.stepCounter4 = 0
     app.stepCounter5 = 0
+    app.stepCounter6 = 0
 
     app.hazardLimit = 700
     
@@ -91,9 +102,13 @@ powerUp3 = powerUp(1000, 230, 50, 50, 'Rectangle', 3)
 crawlid1 = GroundEnemy(700, 100, 50, 30, 50, 'crawlid', None)
 crawlid2 = GroundEnemy(800, 100, 50, 30, 50, 'crawlid', None)
 charger1 = GroundEnemy(900, 100, 60, 74, 50, 'charger', None)
+fly1 = FlyEnemy(1000, -200, 50, 60, 50, 'fly', None)
+
+ghost1 = FlyEnemy(50, 200, 100, 100, 50, 'ghost', None)
+
 
 terrainsList = [flat1, flat2, flat3, flat4, flat5, flat6, oval2, oval3, oval1]
-enemyList = [crawlid1, crawlid2, charger1]
+enemyList = [crawlid1, crawlid2, charger1, fly1, ghost1]
 
 powerUpList = [powerUp1, powerUp2, powerUp3]
 
@@ -292,6 +307,22 @@ def createEnemySprites(app):
         frameFlipped = ImageOps.mirror(frame)
         sprite = CMUImage(frameFlipped)
         app.chargingSprites.append(sprite)
+    
+    app.flySprites = []
+    spritestrip = Image.open('fly.png')
+    for i in range(5):
+        frame = spritestrip.crop((5+168*i, 8, 168+168*i-5, 197))
+        width, height = frame.size
+        frame = frame.resize((int(width/3), int(height/3)))
+        sprite = CMUImage(frame)
+        app.flySprites.append(sprite)
+
+    app.ghostSprites = []
+    frame = Image.open('ghost.png')
+    width, height = frame.size
+    frame = frame.resize((int(width/2), int(height/2)))
+    sprite = CMUImage(frame)
+    app.ghostSprites.append(sprite)
 
 def createAttackSprites(app):
     app.attackSprites = []
@@ -427,6 +458,7 @@ def moveSprites(app):
     app.stepCounter3 += 1
     app.stepCounter4 += 1
     app.stepCounter5 += 1
+    app.stepCounter6 += 1
     if app.stepCounter1>= 7:
         app.spriteCounterMove = (1 + app.spriteCounterMove) % len(app.moveSprites)
         app.stepCounter1 = 0 
@@ -439,9 +471,9 @@ def moveSprites(app):
     if app.stepCounter4 >= 5:
         app.spriteCounterCharger = (1 + app.spriteCounterCharger) % (len(app.chargingSprites)-4)
         app.stepCounter4 = 0
-    # if app.stepCounter5 >= 5:
-    #     player.spriteCounterAttack = (1 + player.spriteCounterAttack) % (len(app.attackSprites))
-    #     app.stepCounter5 = 0
+    if app.stepCounter5 >= 5:
+        app.spriteCounterFly = (1 + app.spriteCounterFly) % (len(app.flySprites))
+        app.stepCounter5 = 0
 
 def recordPreviousPositions(app):
     player.previousPositions.append((player.x, -player.y))
@@ -503,7 +535,7 @@ def drawEnemies(app):
                 elif enemy.direction == 1:
                     sprite = app.enemySprites[1]
                     drawImage(sprite, enemy.x, -enemy.y-5, rotateAngle = enemy.rotateAngle)
-            if enemy.type == 'charger':
+            elif enemy.type == 'charger':
                 if enemy.isCharging == True:
                     if enemy.direction == -1:
                         sprite = app.chargingSprites[app.spriteCounterCharger]
@@ -520,6 +552,16 @@ def drawEnemies(app):
                         sprite = app.enemySprites[app.spriteCounterEnemy+3+7]
                         # drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, rotateAngle = enemy.rotateAngle, fill = 'white')
                         drawImage(sprite, enemy.x, -enemy.y, rotateAngle = enemy.rotateAngle)
+            elif enemy.type == 'fly':
+                sprite = app.flySprites[app.spriteCounterFly]
+                # drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, fill='red')
+                drawImage(sprite, enemy.x, -enemy.y)
+            elif enemy.type == 'ghost':
+                sprite = app.ghostSprites[0]
+                if enemy.isAttacking == True:
+                    drawCircle(enemy.fireballX-player.totalScrollX, -enemy.fireballY, 10, fill='red')
+                drawImage(sprite, enemy.x, -enemy.y)
+                
         else:
             # enemyList.remove(enemy)
             enemy.direction = 0
@@ -595,7 +637,7 @@ def onKeyHold(app, key):
                 if player.isAttacking == True and player.checkAttackColliding(enemy) == True:
                     enemy.takeDamageEnemy(player.playerAttackDamage)
                     player.attackKnockBack(enemy)
-
+                        
 def onKeyRelease(app, key):
     if key == 'd' or key == 'a':
         player.moving = False
@@ -688,6 +730,8 @@ def onStep(app):
                 app.initialDashingCounter = app.generalDashingCounter
                 player.dashing = False
 
+
+
         if player.dashing == True:
             player.dash()
 
@@ -733,7 +777,35 @@ def onStep(app):
                         enemy.timer = 0
 
         for enemy in enemyList:
-            enemy.move()
+            if enemy.type != 'fly' and enemy.type != 'ghost':
+                enemy.move()
+            elif enemy.type == 'fly':
+                if distance(enemy.x, enemy.y, player.x, player.y) <= enemy.sightRadius:
+                    enemy.move(player)
+                else:
+                    x = enemy.initialX - player.totalScrollX
+                    y = enemy.initialY
+                    enemy.moveRandom(x, y)
+            elif enemy.type == 'ghost':
+                if abs(enemy.x-player.x) <= enemy.spawnDistance:
+                    if enemy.teleportTimes == 0:
+                        enemy.teleport(player)
+                        enemy.teleportTimes += 1
+                    if enemy.health < enemy.initialHealth/2 and enemy.teleportTimes == 1:
+                        enemy.teleport(player)
+                        enemy.teleportTimes += 1
+                if enemy.startShootFireball == False and enemy.teleportTimes != 0:
+                    
+                    enemy.fireballX, enemy.fireballY = enemy.x-player.totalScrollX, enemy.y
+                    enemy.finalFireballX, enemy.finalFireballY = player.x-player.totalScrollX, player.y
+                    enemy.startShootFireball = True
+                    
+
+        for enemy in enemyList:
+            if enemy.type == 'ghost' and enemy.startShootFireball == True:
+                enemy.shootFireball(enemy.finalFireballX, enemy.finalFireballY)
+
+
         for enemy in enemyList:
             for terrain in terrainsList:
                 implementLeftRightCollisions(enemy, terrain)

@@ -467,6 +467,7 @@ class Entity:
         self.health -= damage
         if self.health == 0:
             self.isKilled = True
+
     def distance(self, x1, y1, x2, y2):
         return ((x1-x2)**2 + (y1-y2)**2)**0.5
     
