@@ -33,8 +33,9 @@ class FlyEnemy(Entity):
         self.randomRadius = 200
         self.spawnDistance = 300
         self.teleportTimes = 0
-        self.fireballSpeed = 0.01
+        self.fireballSpeed = 0.03
         self.startShootFireball = False
+        self.fireballRadius = 20
 
     def move(self, player):
         xDistance = self.x - player.x

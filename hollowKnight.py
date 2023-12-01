@@ -19,7 +19,7 @@
 
 # [3]
 # Sprites from the game Hollow Knight by Team Cherry, directly taken from Steam game files
-# Includes: player sprites, terrain sprites, health bar sprites
+# Includes: player sprites, terrain sprites, health bar sprites, upgrade area and instructions
 
 # [4]
 # Background Clouds from Twitter: https://pbs.twimg.com/media/Dv340GcWsAMt33a?format=jpg&name=4096x4096 
@@ -59,12 +59,15 @@ def onAppStart(app):
     app.initialFallingCounter = 0
     app.generalDashingCounter = 0
     app.initialDashingCounter = 0
+    app.generalFireballCounter = 0
+    app.initialFireballCounter = 0
 
     app.spriteCounterDash = 0
     app.spriteCounterMove = 0 
     app.spriteCounterEnemy = 0
     app.spriteCounterCharger = 0
     app.spriteCounterFly = 0
+    app.spriteCounterFireball = 0
     
     app.stepCounter1 = 0
     app.stepCounter2 = 0
@@ -72,6 +75,8 @@ def onAppStart(app):
     app.stepCounter4 = 0
     app.stepCounter5 = 0
     app.stepCounter6 = 0
+    app.stepCounter7 = 0
+
     
     app.hazardLimit = 700
 
@@ -95,7 +100,7 @@ def onAppStart(app):
     createUpgradeSprites(app)
     createMainMenuSprites(app)
 
-player = Player(500, 0, 40, 50)
+player = Player(350, 0, 40, 50)
 flat1 = Terrain(450, 480, 521, 50, 'Rectangle', 'Long') # width 521, height 50
 flat2 = Terrain(0, 450, 521, 50, 'Rectangle', 'Long')
 flat3 = Terrain(900, 450, 521, 50, 'Rectangle', 'Long')
@@ -112,6 +117,10 @@ flat12 = Terrain(2900, 370, 90, 90, 'Rectangle', 'Square')
 flat13 = Terrain(4000, 370, 90, 90, 'Rectangle', 'Square')
 flat14 = Terrain(4000, 450, 521, 50, 'Rectangle', 'Long')
 flat15 = Terrain(4500, 450, 521, 50, 'Rectangle', 'Long')
+flat16 = Terrain(5100, 430, 90, 90, 'Rectangle', 'Square') 
+flat17 = Terrain(5300, 460, 90, 90, 'Rectangle', 'Square') 
+flat18 = Terrain(5500, 450, 90, 90, 'Rectangle', 'Square') 
+flat19 = Terrain(5700, 420, 90, 90, 'Rectangle', 'Square') 
 
 oval1 = Terrain(1500, 500, 300, 150, 'outerOval', 'Oval')
 oval2 = Terrain(1300, 550, 300, 150, 'outerOval', 'Oval')
@@ -122,14 +131,16 @@ crawlid1 = GroundEnemy(700, -300, 50, 30, 50, 'crawlid', None)
 crawlid2 = GroundEnemy(800, -300, 50, 30, 50, 'crawlid', None)
 charger1 = GroundEnemy(3500, 100, 60, 74, 50, 'charger', None)
 fly1 = FlyEnemy(1000, -200, 50, 60, 50, 'fly', None)
+fly2 = FlyEnemy(5500, -200, 50, 60, 50, 'fly', None)
+fly3 = FlyEnemy(5700, -200, 50, 60, 50, 'fly', None)
 
 ghost1 = FlyEnemy(4000, 200, 100, 100, 50, 'ghost', None)
 
 
 terrainsList = [flat1, flat2, flat3, flat4, flat5, flat6, flat7, flat8, flat9, flat10, 
-                flat11, flat12, flat13, flat14, flat15,
+                flat11, flat12, flat13, flat14, flat15, flat16, flat17, flat18, flat19,
                 oval2, oval3, oval1]
-enemyList = [crawlid1, crawlid2, charger1, fly1, ghost1]
+enemyList = [crawlid1, crawlid2, charger1, fly1, fly2, fly3, ghost1]
 
 
 def redrawAll(app):
@@ -153,7 +164,6 @@ def redrawAll(app):
 def drawMainMenu(app):
     sprite = app.mainMenuSprite[0]
     drawImage(sprite, 0, 0)
-    print(app.displayTutorial)
     if app.arrowsUp == True:
         drawPolygon(475, 380, 475, 400, 500, 390, fill = 'white')
         drawPolygon(750, 380, 750, 400, 725, 390, fill = 'white')
@@ -168,6 +178,7 @@ def drawInstructions(app):
         x, y = app.upgradePositions[i]
         if app.upgradeStates[i] == False:
             drawStaticInstructions(x, y, app.instructionSprites[i+1])
+    drawStaticInstructions(350-player.totalScrollX, 300, app.instructionSprites[0])
 
 def drawStaticInstructions(x, y, sprite):
     opacityFirst = 100-abs((player.x-(x)))*0.2
@@ -423,6 +434,15 @@ def createEnemySprites(app):
     sprite = CMUImage(frame)
     app.ghostSprites.append(sprite)
 
+    spritestrip = Image.open('Images\enemyFireball.png')
+    app.fireballSprites = [ ]
+    for i in range(4):
+        frame = spritestrip.crop((10+i+136*i, 6, 136+130*i, 125))
+        width, height = frame.size
+        frame = frame.resize((int(width/2), int(height/2)))     
+        sprite = CMUImage(frame)
+        app.fireballSprites.append(sprite)
+
 def createAttackSprites(app):
     app.attackSprites = []
     spritestrip = Image.open('Images\playerAttacksLeftRight.png')
@@ -597,6 +617,7 @@ def moveSprites(app):
     app.stepCounter4 += 1
     app.stepCounter5 += 1
     app.stepCounter6 += 1
+    app.stepCounter7 += 1
     if app.stepCounter1>= 7:
         app.spriteCounterMove = (1 + app.spriteCounterMove) % len(app.moveSprites)
         app.stepCounter1 = 0 
@@ -612,7 +633,9 @@ def moveSprites(app):
     if app.stepCounter5 >= 5:
         app.spriteCounterFly = (1 + app.spriteCounterFly) % (len(app.flySprites))
         app.stepCounter5 = 0
-
+    if app.stepCounter7 >= 5:
+        app.spriteCounterFireball = (1 + app.spriteCounterFireball) % (len( app.fireballSprites))
+        app.stepCounter7 = 0 
 def recordPreviousPositions(app):
     player.previousPositions.append((player.x, -player.y))
     if len(player.previousPositions) > 5:
@@ -695,11 +718,13 @@ def drawEnemies(app):
                 # drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, fill='red')
                 drawImage(sprite, enemy.x, -enemy.y)
             elif enemy.type == 'ghost':
+                if enemy.startShootFireball == True:
+                    drawCircle(enemy.fireballX, -enemy.fireballY, enemy.fireballRadius, fill='red')
+                    drawLine(enemy.fireballX, -enemy.fireballY, enemy.finalFireballX, -enemy.finalFireballY)
+                    sprite = app.fireballSprites[app.spriteCounterFireball]
+                    drawImage(sprite, enemy.fireballX, -enemy.fireballY, align = 'center')
                 sprite = app.ghostSprites[0]
-                if enemy.isAttacking == True:
-                    drawCircle(enemy.fireballX-player.totalScrollX, -enemy.fireballY, 10, fill='red')
                 drawImage(sprite, enemy.x, -enemy.y)
-                
         else:
             # enemyList.remove(enemy)
             enemy.direction = 0
@@ -723,6 +748,8 @@ def onKeyPress(app, key):
             app.displayTutorial = True
     if app.gameStarted == True:
         if player.freezeEverything == False:
+            if key == 'space':
+                player.level = 3
             if key == 'a':
                 player.direction = 'left'
                 player.move(-1)
@@ -838,9 +865,14 @@ def onStep(app):
         for enemy in enemyList:
             if enemy.y >= app.hazardLimit:
                 del enemy
+        for enemy in enemyList:
+            if enemy.type == 'ghost' and enemy.isAttacking:
+                if distance(enemy.fireballX, enemy.fireballY, player.x, player.y) <= enemy.fireballRadius + 30:
+                    player.updateHealth(-1)
             
         if player.freezeEverything == True:
             app.generalFreezeCounter += 1
+            
             if app.generalFreezeCounter - app.initialFreezeCounter > player.freezeDuration:
                 app.initialFreezeCounter = app.generalFreezeCounter
                 player.freezeEverything = False
@@ -893,6 +925,12 @@ def onStep(app):
                 if app.generalFallingCounter - app.initialFallingCounter > player.startFallDuration:
                     app.initialFallingCounter = app.generalFallingCounter
                     player.falling = True
+            
+            if enemy.startShootFireball == True:
+                app.generalFireballCounter += 1
+                if app.generalFireballCounter - app.initialFireballCounter > 90:
+                    app.initialFireballCounter = app.generalFireballCounter
+                    enemy.startShootFireball = False
 
             if player.isInvincible == True:
                 app.generalInvincibleCounter += 1
@@ -977,10 +1015,10 @@ def onStep(app):
                             enemy.teleport(player)
                             enemy.teleportTimes += 1
                     if enemy.startShootFireball == False and enemy.teleportTimes != 0:
-                        
-                        enemy.fireballX, enemy.fireballY = enemy.x-player.totalScrollX, enemy.y
-                        enemy.finalFireballX, enemy.finalFireballY = player.x-player.totalScrollX, player.y
+                        enemy.fireballX, enemy.fireballY = enemy.x, enemy.y
+                        enemy.finalFireballX, enemy.finalFireballY = player.x, player.y
                         enemy.startShootFireball = True
+                        
                         
 
             for enemy in enemyList:
