@@ -2,7 +2,6 @@ import math
 from cmu_graphics import *
 from Vector import *
 
-
 class Entity:
     def __init__(self, x, y, width, height, level=0): 
         self.x = x
@@ -83,7 +82,7 @@ class Entity:
         self.infinity = 10*15
         self.epsilon = 10*-15
 
-        self.playerAttackKnockBackDistanceHorizontal = 50
+        self.playerAttackKnockBackDistanceHorizontal = 0
         self.enemyAttackKnockBackDistanceHorizontal = 100
         self.enemyKnockBackDistanceVertical = 100
 
@@ -248,7 +247,8 @@ class Entity:
                 return (True, 'left', terrain.rightX) 
         return False, None, None
 
-    def checkAttackColliding(self, enemy):
+
+    def initializeVariables(self):
         self.cornersAttack = []
         self.cornersEnemy = []
         self.projectedEnemy = []
@@ -258,6 +258,8 @@ class Entity:
         self.fourPointsEnemy1 = []
         self.fourPointsEnemy2 = []
 
+    def checkAttackColliding(self, enemy):
+        self.initializeVariables()
         topY = -self.attackY
         leftX = self.attackX
         bottomY = -(self.attackY - self.height)
@@ -475,6 +477,7 @@ class Entity:
         self.health -= damage
         if self.health == 0:
             self.isKilled = True
+        
 
     def distance(self, x1, y1, x2, y2):
         return ((x1-x2)**2 + (y1-y2)**2)**0.5

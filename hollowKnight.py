@@ -44,9 +44,8 @@ from PIL import Image, ImageOps
 
 def onAppStart(app):
     app.scrollX = 0
-    
     app.scrollMargin = 400
-    app.stepsPerSecond = 30
+    app.stepsPerSecond = 60
     app.generalAttackCounter = 0
     app.previousAttackTime = 0
     app.initialAttackCounter = 0
@@ -121,6 +120,8 @@ flat16 = Terrain(5100, 430, 90, 90, 'Rectangle', 'Square')
 flat17 = Terrain(5300, 460, 90, 90, 'Rectangle', 'Square') 
 flat18 = Terrain(5500, 450, 90, 90, 'Rectangle', 'Square') 
 flat19 = Terrain(5700, 420, 90, 90, 'Rectangle', 'Square') 
+flat20 = Terrain(5900, 450, 521, 50, 'Rectangle', 'Long')
+flat21 = Terrain(6400, 450, 521, 50, 'Rectangle', 'Long')
 
 oval1 = Terrain(1500, 500, 300, 150, 'outerOval', 'Oval')
 oval2 = Terrain(1300, 550, 300, 150, 'outerOval', 'Oval')
@@ -129,6 +130,7 @@ oval3 = Terrain(1700, 550, 300, 150, 'outerOval', 'Oval')
 
 crawlid1 = GroundEnemy(700, -300, 50, 30, 50, 'crawlid', None)
 crawlid2 = GroundEnemy(800, -300, 50, 30, 50, 'crawlid', None)
+crawlid3 = GroundEnemy(1500, -300, 50, 30, 50, 'crawlid', None)
 charger1 = GroundEnemy(3500, 100, 60, 74, 50, 'charger', None)
 fly1 = FlyEnemy(1000, -200, 50, 60, 50, 'fly', None)
 fly2 = FlyEnemy(5500, -200, 50, 60, 50, 'fly', None)
@@ -138,9 +140,10 @@ ghost1 = FlyEnemy(4000, 200, 100, 100, 50, 'ghost', None)
 
 
 terrainsList = [flat1, flat2, flat3, flat4, flat5, flat6, flat7, flat8, flat9, flat10, 
-                flat11, flat12, flat13, flat14, flat15, flat16, flat17, flat18, flat19,
+                flat11, flat12, flat13, flat14, flat15, flat16, flat17, flat18, flat19, flat20,
+                flat21,
                 oval2, oval3, oval1]
-enemyList = [crawlid1, crawlid2, charger1, fly1, fly2, fly3, ghost1]
+enemyList = [crawlid1, crawlid2, crawlid3, charger1, fly1, fly2, fly3, ghost1]
 
 
 def redrawAll(app):
@@ -172,6 +175,10 @@ def drawMainMenu(app):
         drawPolygon(740, 420, 740, 440, 715, 430, fill = 'white')
     if app.displayTutorial == True:
         sprite = app.mainMenuSprite[1]
+        drawImage(sprite, 0, 0)
+    if player.isKilled == True:
+        sprite = app.mainMenuSprite[2]
+        print(1)
         drawImage(sprite, 0, 0)
 def drawInstructions(app):
     for i in range(len(app.upgradePositions)):
@@ -348,6 +355,12 @@ def createMainMenuSprites(app):
     sprite = CMUImage(frame)
     app.mainMenuSprite.append(sprite)
 
+    spritestrip = Image.open('Images\\Death.png')
+    width, height = spritestrip.size
+    frame = spritestrip.resize((int(width*0.7), int(height*0.7)))
+    sprite = CMUImage(frame)
+    app.mainMenuSprite.append(sprite)
+
 
 def drawUpgradeAreas(app):
     sprite =  app.upgradeSprites[0]
@@ -437,7 +450,7 @@ def createEnemySprites(app):
     spritestrip = Image.open('Images\enemyFireball.png')
     app.fireballSprites = [ ]
     for i in range(4):
-        frame = spritestrip.crop((10+i+136*i, 6, 136+130*i, 125))
+        frame = spritestrip.crop((10+i+136*i, 6, 136+130*i, 120))
         width, height = frame.size
         frame = frame.resize((int(width/2), int(height/2)))     
         sprite = CMUImage(frame)
@@ -618,22 +631,22 @@ def moveSprites(app):
     app.stepCounter5 += 1
     app.stepCounter6 += 1
     app.stepCounter7 += 1
-    if app.stepCounter1>= 7:
+    if app.stepCounter1>= 3:
         app.spriteCounterMove = (1 + app.spriteCounterMove) % len(app.moveSprites)
         app.stepCounter1 = 0 
-    if app.stepCounter2>= 5:
+    if app.stepCounter2>= 3:
         app.spriteCounterDash = (1 + app.spriteCounterDash) % len(app.dashSprites)
         app.stepCounter2 = 0 
-    if app.stepCounter3 >= 5:
+    if app.stepCounter3 >= 3:
         app.spriteCounterEnemy = (1 + app.spriteCounterEnemy) % (len(app.enemySprites)-3-7) # 3 for crawlid, 7 for left direction
         app.stepCounter3 = 0
-    if app.stepCounter4 >= 5:
+    if app.stepCounter4 >= 3:
         app.spriteCounterCharger = (1 + app.spriteCounterCharger) % (len(app.chargingSprites)-4)
         app.stepCounter4 = 0
-    if app.stepCounter5 >= 5:
+    if app.stepCounter5 >= 3:
         app.spriteCounterFly = (1 + app.spriteCounterFly) % (len(app.flySprites))
         app.stepCounter5 = 0
-    if app.stepCounter7 >= 5:
+    if app.stepCounter7 >= 3:
         app.spriteCounterFireball = (1 + app.spriteCounterFireball) % (len( app.fireballSprites))
         app.stepCounter7 = 0 
 def recordPreviousPositions(app):
@@ -718,9 +731,8 @@ def drawEnemies(app):
                 # drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, fill='red')
                 drawImage(sprite, enemy.x, -enemy.y)
             elif enemy.type == 'ghost':
-                if enemy.startShootFireball == True:
+                if enemy.startShootFireball == True and distance(enemy.x, enemy.y, player.x, player.y) <= 400:
                     drawCircle(enemy.fireballX, -enemy.fireballY, enemy.fireballRadius, fill='red')
-                    drawLine(enemy.fireballX, -enemy.fireballY, enemy.finalFireballX, -enemy.finalFireballY)
                     sprite = app.fireballSprites[app.spriteCounterFireball]
                     drawImage(sprite, enemy.fireballX, -enemy.fireballY, align = 'center')
                 sprite = app.ghostSprites[0]
@@ -776,6 +788,8 @@ def onKeyPress(app, key):
                 for enemy in enemyList:
                     if player.isAttacking == True and player.checkAttackColliding(enemy) == True and not enemy.isKilled:
                         enemy.takeDamageEnemy(player.playerAttackDamage)
+                        if enemy.type == 'ghost':
+                            enemy.teleport(player)
                         player.attackKnockBack(enemy)
                         if player.resource < 75:
                             player.resource += player.resourceGain
@@ -1009,9 +1023,6 @@ def onStep(app):
                 elif enemy.type == 'ghost':
                     if abs(enemy.x-player.x) <= enemy.spawnDistance:
                         if enemy.teleportTimes == 0:
-                            enemy.teleport(player)
-                            enemy.teleportTimes += 1
-                        if enemy.health < enemy.initialHealth/2 and enemy.teleportTimes == 1:
                             enemy.teleport(player)
                             enemy.teleportTimes += 1
                     if enemy.startShootFireball == False and enemy.teleportTimes != 0:
