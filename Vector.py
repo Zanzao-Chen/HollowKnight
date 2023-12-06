@@ -59,12 +59,13 @@ class Vector:
         y = self.gradient*x + self.intercept
         return (x, y)
 
-    def draw(self):
-        if abs(self.gradient) >= self.infinity:
-            return self.initialX, self.initialY + 1000, self.initialX, self.initialY - 1000
-        elif abs(self.gradient) <= self.epsilon:
-            return self.initialX+1000, self.initialY, self.initialX- 1000, self.initialY 
-        return self.initialX-1000, self.initialY-(1000*self.gradient), self.initialX+1000, self.initialY+(1000*self.gradient)
+    # for testing purposes
+    # def draw(self):
+    #     if abs(self.gradient) >= self.infinity:
+    #         return self.initialX, self.initialY + 1000, self.initialX, self.initialY - 1000
+    #     elif abs(self.gradient) <= self.epsilon:
+    #         return self.initialX+1000, self.initialY, self.initialX- 1000, self.initialY 
+    #     return self.initialX-1000, self.initialY-(1000*self.gradient), self.initialX+1000, self.initialY+(1000*self.gradient)
 
 # test cases
 # vectorTest = Vector(1, 1+3**0.5, 30)

@@ -21,10 +21,11 @@ class Terrain:
             self.topY = self.y - self.height/2
             self.bottomY = self.y + self.height/2
 
+    # retrieves corresponding y-position (upper) on the oval based on x value
     def getY(self, x):
         x0 = self.x
         y0 = self.y
         a = self.width/2
         b = self.height/2
-        return -b*((1-((x-x0)/a)**2)**0.5) + y0
+        return -b*((1-((x-x0)/a)**2)**0.5) + y0 # this is based on the equation for an oval, rearranged
     

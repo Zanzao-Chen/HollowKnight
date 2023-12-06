@@ -4,6 +4,7 @@
 # Stack Overflow, How to detect when rotated rectangles are colliding each other
 # https://stackoverflow.com/questions/62028169/how-to-detect-when-rotated-rectangles-are-colliding-each-other 
 # I did not use any code from this source; I only used the visual pictures to understand the theory for the separating axis algorithm
+# the checkAttackColliding method in the Entity class is based on this algorithm
 
 # [2] 
 # CS Academy Class Notes F22 Part 4, side scrolling
@@ -85,7 +86,39 @@ def onAppStart(app):
     app.gameStarted = False
     app.arrowsUp = True
     app.displayTutorial = False
+
+    app.polygonX = 475
+    app.polygonY = 380
+    app.polygonWidth = 25
+    app.polygonHeight = 10
+    app.polygonXdistance = 275
+    app.polygonX2 = 485
+    app.polygonY2 = 420
+    app.polygonXdistance2 = 255
+    app.staticInstructionx = 350
+    app.staticInstructiony = 300
+    app.opacityFadeOut = 0.2 # controls how far it takes for the instructions to fade out
+    app.backgroundParallax = 5 # how much main game moves relative to background
+
+    app.ovalAdjustment = 20
+    app.dashAdjustment = 18
+    app.enemyAdjustment = -5
+    app.attackAdjustment = -150
+    app.enemyAdjustmentY = -5
+    app.enemyChargerAdjustmentY = 30
+    app.terrainAdjustmentY = -2
     
+    app.dashOpacity = 20
+
+    app.resourceX = 100
+    app.resourceWidth = 159
+    app.resourceY = 170
+    app.resourceHeight = 20
+    app.threshold = 3
+    
+
+    app.respawnUpDistance = 500    
+
     createPlayerIdleSprites(app)
     createPlayerMovingSprites(app)
     createPlayerDashingSprites(app)
@@ -145,6 +178,11 @@ terrainsList = [flat1, flat2, flat3, flat4, flat5, flat6, flat7, flat8, flat9, f
                 oval2, oval3, oval1]
 enemyList = [crawlid1, crawlid2, crawlid3, charger1, fly1, fly2, fly3, ghost1]
 
+# crawlid: basic ground enemy that moves left and right, reverses when hits a wall
+# charger: ground enemy that charges towards player when in line of sight
+# fly: basic flying enemy that follows the player within a certain radius, decelerates as it gets closer
+# ghost: hitting it causes it to randomly teleport, shoots fireballs that follows player in a line
+
 
 def redrawAll(app):
     player.getPlayerVertices()
@@ -164,32 +202,39 @@ def redrawAll(app):
     if app.gameStarted == False:
         drawMainMenu(app)
 
+
+# functions that start with "create": imports the sprites into a list 
+# functions that start with "draw": draws the sprites
+
 def drawMainMenu(app):
     sprite = app.mainMenuSprite[0]
     drawImage(sprite, 0, 0)
-    if app.arrowsUp == True:
-        drawPolygon(475, 380, 475, 400, 500, 390, fill = 'white')
-        drawPolygon(750, 380, 750, 400, 725, 390, fill = 'white')
+    if app.arrowsUp == True: 
+        drawPolygon(app.polygonX, app.polygonY, app.polygonX, app.polygonY+app.polygonHeight*2, 
+                    app.polygonX+app.polygonWidth, app.polygonY+app.polygonHeight, fill = 'white')
+        drawPolygon(app.polygonX+app.polygonXdistance, app.polygonY, app.polygonX+app.polygonXdistance, app.polygonY+app.polygonHeight*2, 
+                    app.polygonX+app.polygonXdistance-app.polygonWidth, app.polygonY+app.polygonHeight, fill = 'white')
     if app.arrowsUp == False:
-        drawPolygon(485, 420, 485, 440, 510, 430, fill = 'white')
-        drawPolygon(740, 420, 740, 440, 715, 430, fill = 'white')
+        drawPolygon(app.polygonX2, app.polygonY2, app.polygonX2, app.polygonY2+app.polygonHeight*2, 
+                    app.polygonX2+app.polygonWidth, app.polygonY2+app.polygonHeight, fill = 'white')
+        drawPolygon(app.polygonX2+app.polygonXdistance2, app.polygonY2, app.polygonX2+app.polygonXdistance2, app.polygonY2+app.polygonHeight*2, 
+                    app.polygonX2+app.polygonXdistance2-app.polygonWidth, app.polygonY2+app.polygonHeight, fill = 'white')
     if app.displayTutorial == True:
         sprite = app.mainMenuSprite[1]
         drawImage(sprite, 0, 0)
     if player.isKilled == True:
         sprite = app.mainMenuSprite[2]
-        print(1)
         drawImage(sprite, 0, 0)
 
 def drawInstructions(app):
     for i in range(len(app.upgradePositions)):
         x, y = app.upgradePositions[i]
         if app.upgradeStates[i] == False:
-            drawStaticInstructions(x, y, app.instructionSprites[i+1])
-    drawStaticInstructions(350-player.totalScrollX, 300, app.instructionSprites[0])
+            drawStaticInstructions(app, x, y, app.instructionSprites[i+1])
+    drawStaticInstructions(app, app.staticInstructionx-player.totalScrollX, app.staticInstructiony, app.instructionSprites[0])
 
-def drawStaticInstructions(x, y, sprite):
-    opacityFirst = 100-abs((player.x-(x)))*0.2
+def drawStaticInstructions(app, x, y, sprite):
+    opacityFirst = 100-abs((player.x-(x)))*app.opacityFadeOut
     if opacityFirst > 100:
         opacityFirst = 100
     elif opacityFirst < 0:
@@ -201,7 +246,7 @@ def drawBackground(app):
     sprite = app.backgroundSprites[0]
     drawImage(sprite, player.backgroundX, 0)
 
-def sideScroll(app):
+def sideScroll(app): # 
     if player.moving or player.dashing:
         for enemy in enemyList:
             enemy.x -= app.scrollX
@@ -210,7 +255,7 @@ def sideScroll(app):
         player.x -= app.scrollX
         player.totalScrollX += app.scrollX
         if player.totalScrollX > 0:
-            player.backgroundX -= app.scrollX/5
+            player.backgroundX -= app.scrollX/app.backgroundParallax
         for i in range(len(app.upgradePositions)):
             x, y = app.upgradePositions[i]
             x -= app.scrollX
@@ -282,20 +327,23 @@ def drawHealth(app):
         else:
             sprite = app.healthSprites[1]
             drawImage(sprite, player.healthX+player.healthXInterval*i, player.healthY)
+        
     if player.resource > 0:
-        if player.resource >= 50:
+        if player.resource >= player.resourceMax/2:
             color1 = 'white'
         else:
             color1 = 'grey'
-        drawRect(100, 170, int(159*(player.resource/50)), 20, fill=color1)
-    if player.resource > 50:
-        if player.resource == 100:
+        drawRect(app.resourceX, app.resourceY, 
+                 int(app.resourceWidth*(player.resource/(player.resourceMax/2))), app.resourceHeight, fill=color1)
+    if player.resource > player.resourceMax/2:
+        if player.resource == player.resourceMax:
             color2 = 'white'
         else:
             color2 = 'grey'
-        drawRect(259, 170, int(159*((player.resource-50)/50)), 20, fill=color2)
-    drawRect(100, 170, 159, 20, fill=None, border='black')
-    drawRect(259, 170, 159, 20, fill=None, border='black')
+        drawRect(app.resourceX+app.resourceWidth, app.resourceY, 
+                 int(app.resourceWidth*((player.resource-(player.resourceMax/2))/(player.resourceMax/2))), app.resourceHeight, fill=color2)
+    drawRect(app.resourceX, app.resourceY, app.resourceWidth, app.resourceHeight, fill=None, border='black')
+    drawRect(app.resourceX+app.resourceWidth, app.resourceY, app.resourceWidth, app.resourceHeight, fill=None, border='black')
 
 
 def drawPlayer(app):
@@ -311,10 +359,10 @@ def drawPlayer(app):
     for (x, y, angle) in player.dashingPositions:
         if player.direction == 'left':
             sprite = app.dashSpritesFlipped[app.spriteCounterDash]
-            drawImage(sprite, x-player.spriteX, -y+18, rotateAngle = angle, align = 'left', opacity = 20)
+            drawImage(sprite, x-player.spriteX, -y+app.dashAdjustment, rotateAngle = angle, align = 'left', opacity = app.dashOpacity)
         elif player.direction == 'right':
             sprite = app.dashSprites[app.spriteCounterDash]
-            drawImage(sprite, x-player.spriteX, -y+18, rotateAngle = angle, align = 'left', opacity = 20)
+            drawImage(sprite, x-player.spriteX, -y+app.dashAdjustment, rotateAngle = angle, align = 'left', opacity = app.dashOpacity)
     # drawRect(player.x, -player.y, player.width, player.height, fill = 'black', rotateAngle = player.rotateAngle)
     # drawCircle(player.orientationX, player.orientationY, 3, fill='red')
     if player.dashing == True:
@@ -322,21 +370,21 @@ def drawPlayer(app):
             sprite = app.dashSpritesFinal[1]
         elif player.direction == 'left':
             sprite = app.dashSpritesFinal[0]
-        drawImage(sprite, player.x-player.spriteX, -player.y+18, align = 'left')
+        drawImage(sprite, player.x-player.spriteX, -player.y+app.dashAdjustment, align = 'left')
     if player.moving == False and player.dashing == False:
         if player.direction == 'left':
             sprite = app.idleSprites[1]
-            drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
+            drawImage(sprite, player.x-player.spriteX, -player.y+app.dashAdjustment, rotateAngle = player.rotateAngle, align = 'left')
         elif player.direction == 'right':
             sprite = app.idleSprites[0]
-            drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
+            drawImage(sprite, player.x-player.spriteX, -player.y+app.dashAdjustment, rotateAngle = player.rotateAngle, align = 'left')
     elif player.moving == True and player.dashing == False:
         if player.direction == 'right':
             sprite = app.moveSprites[app.spriteCounterMove]
-            drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
+            drawImage(sprite, player.x-player.spriteX, -player.y+app.dashAdjustment, rotateAngle = player.rotateAngle, align = 'left')
         elif player.direction == 'left':
             sprite = app.moveSpritesFlipped[app.spriteCounterMove]
-            drawImage(sprite, player.x-player.spriteX, -player.y+18, rotateAngle = player.rotateAngle, align = 'left')
+            drawImage(sprite, player.x-player.spriteX, -player.y+app.dashAdjustment, rotateAngle = player.rotateAngle, align = 'left')
 
 def createMainMenuSprites(app):
     spritestrip = Image.open('Images\\mainMenu.png')
@@ -588,16 +636,17 @@ def drawTerrain(app):
         if terrain.type == 'Rectangle':
             if terrain.subtype == 'Long':
                 sprite = app.terrainSprites[0]
+                
                 # drawRect(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
-                drawImage(sprite, terrain.x, terrain.y-2, align = 'top-left')
+                drawImage(sprite, terrain.x, terrain.y+app.terrainAdjustmentY, align = 'top-left')
             elif terrain.subtype == 'Square':
                 sprite = app.terrainSprites[1]
                 # drawRect(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
-                drawImage(sprite, terrain.x, terrain.y-2, align = 'top-left')
+                drawImage(sprite, terrain.x, terrain.y+app.terrainAdjustmentY, align = 'top-left')
         elif terrain.type == 'outerOval':
             sprite = app.terrainSprites[2]
             # drawOval(terrain.x, terrain.y, terrain.width, terrain.height, fill = 'green')
-            drawImage(sprite, terrain.x+20, terrain.y-2, align = 'center')
+            drawImage(sprite, terrain.x+app.ovalAdjustment, terrain.y+app.terrainAdjustmentY, align = 'center')
 
 def createTerrainSprites(app):
     app.terrainSprites = []
@@ -627,22 +676,22 @@ def moveSprites(app):
     app.stepCounter5 += 1
     app.stepCounter6 += 1
     app.stepCounter7 += 1
-    if app.stepCounter1>= 3:
+    if app.stepCounter1>= app.threshold:
         app.spriteCounterMove = (1 + app.spriteCounterMove) % len(app.moveSprites)
         app.stepCounter1 = 0 
-    if app.stepCounter2>= 3:
+    if app.stepCounter2>= app.threshold:
         app.spriteCounterDash = (1 + app.spriteCounterDash) % len(app.dashSprites)
         app.stepCounter2 = 0 
-    if app.stepCounter3 >= 3:
+    if app.stepCounter3 >= app.threshold:
         app.spriteCounterEnemy = (1 + app.spriteCounterEnemy) % (len(app.enemySprites)-3-7) # 3 for crawlid, 7 for left direction
         app.stepCounter3 = 0
-    if app.stepCounter4 >= 3:
+    if app.stepCounter4 >= app.threshold:
         app.spriteCounterCharger = (1 + app.spriteCounterCharger) % (len(app.chargingSprites)-4)
         app.stepCounter4 = 0
-    if app.stepCounter5 >= 3:
+    if app.stepCounter5 >= app.threshold:
         app.spriteCounterFly = (1 + app.spriteCounterFly) % (len(app.flySprites))
         app.stepCounter5 = 0
-    if app.stepCounter7 >= 3:
+    if app.stepCounter7 >= app.threshold:
         app.spriteCounterFireball = (1 + app.spriteCounterFireball) % (len( app.fireballSprites))
         app.stepCounter7 = 0 
 
@@ -662,25 +711,26 @@ def drawAttacks(app):
             if player.spriteCounterAttack < 4:
                 # drawRect(player.attackX, -player.attackY, player.attackWidth, player.attackHeight, fill='red', rotateAngle=player.rotateAngle)
                 sprite = app.attackSprites[player.spriteCounterAttack]
-                drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
+                
+                drawImage(sprite, player.attackX+app.attackAdjustment, -player.attackY,rotateAngle=player.rotateAngle)
                 player.spriteCounterAttack += 1
                 player.isAttacking = False
             else:
                 player.spriteCounterAttack = 0
                 sprite = app.attackSprites[4]
-                drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
+                drawImage(sprite, player.attackX+app.attackAdjustment, -player.attackY,rotateAngle=player.rotateAngle)
                 player.isAttacking = False
             
         elif player.attackDirection == 'left':
             if player.spriteCounterAttack < 4:
                 sprite = app.attackSprites[player.spriteCounterAttack+5]
-                drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
+                drawImage(sprite, player.attackX+app.attackAdjustment, -player.attackY,rotateAngle=player.rotateAngle)
                 player.spriteCounterAttack += 1
                 player.isAttacking = False
             else:
                 player.spriteCounterAttack = 0
                 sprite = app.attackSprites[4+5]
-                drawImage(sprite, player.attackX-150, -player.attackY,rotateAngle=player.rotateAngle)
+                drawImage(sprite, player.attackX+app.attackAdjustment, -player.attackY,rotateAngle=player.rotateAngle)
                 player.isAttacking = False
         elif player.attackDirection == 'up':
             sprite = app.attackUpDownSprites[1]
@@ -699,18 +749,19 @@ def drawEnemies(app):
                 if enemy.direction == -1:
                     # drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, rotateAngle = enemy.rotateAngle, fill = 'white')
                     sprite = app.enemySprites[0]
-                    drawImage(sprite, enemy.x, -enemy.y-5, rotateAngle = enemy.rotateAngle) 
+                    
+                    drawImage(sprite, enemy.x, -enemy.y+app.enemyAdjustmentY, rotateAngle = enemy.rotateAngle) 
                 elif enemy.direction == 1:
                     sprite = app.enemySprites[1]
-                    drawImage(sprite, enemy.x, -enemy.y-5, rotateAngle = enemy.rotateAngle)
+                    drawImage(sprite, enemy.x, -enemy.y+app.enemyAdjustmentY, rotateAngle = enemy.rotateAngle)
             elif enemy.type == 'charger':
                 if enemy.isCharging == True:
                     if enemy.direction == -1:
                         sprite = app.chargingSprites[app.spriteCounterCharger]
-                        drawImage(sprite, enemy.x, -enemy.y+30, rotateAngle = enemy.rotateAngle)
+                        drawImage(sprite, enemy.x, -enemy.y+app.enemyChargerAdjustmentY, rotateAngle = enemy.rotateAngle)
                     elif enemy.direction == 1:
                         sprite = app.chargingSprites[app.spriteCounterCharger+4]
-                        drawImage(sprite, enemy.x, -enemy.y+30, rotateAngle = enemy.rotateAngle)
+                        drawImage(sprite, enemy.x, -enemy.y+app.enemyChargerAdjustmentY, rotateAngle = enemy.rotateAngle)
                 elif enemy.isCharging == False:
                     if enemy.direction == -1:
                         sprite = app.enemySprites[app.spriteCounterEnemy+3]
@@ -724,8 +775,9 @@ def drawEnemies(app):
                 sprite = app.flySprites[app.spriteCounterFly]
                 # drawRect(enemy.x, -enemy.y, enemy.width, enemy.height, fill='red')
                 drawImage(sprite, enemy.x, -enemy.y)
+                
             elif enemy.type == 'ghost':
-                if enemy.startShootFireball == True and distance(enemy.x, enemy.y, player.x, player.y) <= 400:
+                if enemy.startShootFireball == True and distance(enemy.x, enemy.y, player.x, player.y) <= enemy.ghostSpawnIn:
                     drawCircle(enemy.fireballX, -enemy.fireballY, enemy.fireballRadius, fill='red')
                     sprite = app.fireballSprites[app.spriteCounterFireball]
                     drawImage(sprite, enemy.fireballX, -enemy.fireballY, align = 'center')
@@ -736,7 +788,7 @@ def drawEnemies(app):
             enemy.direction = 0
             if enemy.type == 'crawlid':
                 sprite = app.enemySprites[2]
-                drawImage(sprite, enemy.x, -enemy.y-5, rotateAngle = enemy.rotateAngle) 
+                drawImage(sprite, enemy.x, -enemy.y+app.enemyAdjustment, rotateAngle = enemy.rotateAngle) 
  
 def onKeyPress(app, key):
     if app.displayTutorial == True and key == 'p':
@@ -802,10 +854,10 @@ def dash(app, key):
             if enemy.type == 'ghost':
                 enemy.teleport(player)
             player.attackKnockBack(enemy)
-            if player.resource < 75:
+            if player.resource < player.resourceMax-player.resourceGain:
                 player.resource += player.resourceGain
-            elif player.resource >= 75:
-                player.resource = 100
+            elif player.resource >= player.resourceMax-player.resourceGain:
+                player.resource = player.resourceMax
             if enemy.type == 'charger':
                 attackDirection = None
                 if player.attackDirection == 'left':
@@ -865,7 +917,7 @@ def implementRespawn(app):
             if terrain.type == 'Rectangle':
                 terrain.getTerrainVertices()
                 x, y = (terrain.leftX + terrain.rightX)/2, terrain.topY
-                app.respawnPoints.append((x, -y+500))
+                app.respawnPoints.append((x, -y+app.respawnUpDistance))
         respawnDistance = []
         for (x, y) in app.respawnPoints:
             respawnDistance.append(distance(x, y, player.x, player.y))
@@ -880,7 +932,7 @@ def deleteFallenEnemies(app):
             del enemy
     for enemy in enemyList:
         if enemy.type == 'ghost' and enemy.isAttacking:
-            if distance(enemy.fireballX, enemy.fireballY, player.x, player.y) <= enemy.fireballRadius + 30:
+            if distance(enemy.fireballX, enemy.fireballY, player.x, player.y) <= enemy.fireballRadius + player.width: # compensates for player width
                 player.updateHealth(-1)
 
 def stopFreeze(app):
@@ -894,7 +946,7 @@ def checkPowerUps(app):
     for i in range(len(app.upgradePositions)):
         if app.upgradeStates[i] == True:
             x, y = app.upgradePositions[i]
-            if distance(player.x, -player.y, x, y) <= app.powerUpRadius+40: # compensates for player width
+            if distance(player.x, -player.y, x, y) <= app.powerUpRadius+player.width: # compensates for player width
                 app.upgradeStates[i] = False
                 player.level += 1
 
@@ -970,7 +1022,7 @@ def checkEnemyCollisions(app):
                 enemy.isCollidingWithOval = False
             if isColliding and terrain.type == 'Rectangle':
                 if enemy.rotateAngle != 0:
-                    enemy.index += 0.05
+                    enemy.index += enemy.smoothAngleAdjustment
                     enemy.resetAngle()
                 if direction == 'right':
                     enemy.x = reference - enemy.width
@@ -1056,7 +1108,7 @@ def checkPlayerCollisions(app):
         elif isColliding and terrain.type == 'Rectangle':
             player.isCollidingWithRect = True
             if player.rotateAngle != 0:
-                player.index += 0.05
+                player.index += player.smoothAngleAdjustment
                 player.resetAngle()
             if direction == 'right':
                 player.x = reference - player.width

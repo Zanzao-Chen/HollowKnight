@@ -79,7 +79,7 @@ class Entity:
         self.twoPointsEnemy2 = []
 
         self.projectionCollisions = 0
-        self.infinity = 10*15
+        self.infinity = 10*15 
         self.epsilon = 10*-15
 
         self.playerAttackKnockBackDistanceHorizontal = 0
@@ -110,6 +110,11 @@ class Entity:
         self.resource = 0
         self.resourceGain = 10
         self.resourceCost = 50
+        self.resourceMax = 100
+        
+
+        self.smoothAngleAdjustment = 0.05 # smooth transition when going from curved surface to flat terrain
+
 
     def move(self, direction):
         if self.isCollidingWithAnything:
@@ -280,7 +285,7 @@ class Entity:
                                 (self.attackX+self.attackWidth, -self.attackY),
                                 (self.attackX+self.attackWidth, -self.attackY+self.attackHeight)]
         else:
-            shiftAttackX = (self.attackWidth/2)/(math.cos(attackAngle*math.pi/180)+0.00001)
+            shiftAttackX = (self.attackWidth/2)/(math.cos(attackAngle*math.pi/180)+0.00001) # 0.00001 to avoid division by zero errors
             shiftAttackY = (self.attackHeight/2)/(math.sin(attackAngle*math.pi/180)+0.00001)
             self.vectorAttackRightX = Vector(middleX+shiftAttackX, middleY, attackAngle)
             self.vectorAttackLeftX = Vector(middleX-shiftAttackX, middleY, attackAngle)
@@ -418,6 +423,7 @@ class Entity:
         else:
             self.projectionCollisions = 0
             return False
+        
     def checkAttackColliding(self, enemy):
         self.initializeVariables()
         self.getRotatedCorners(enemy)
