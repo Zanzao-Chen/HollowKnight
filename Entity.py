@@ -258,8 +258,7 @@ class Entity:
         self.fourPointsEnemy1 = []
         self.fourPointsEnemy2 = []
 
-    def checkAttackColliding(self, enemy):
-        self.initializeVariables()
+    def getRotatedCorners(self, enemy):
         topY = -self.attackY
         leftX = self.attackX
         bottomY = -(self.attackY - self.height)
@@ -269,7 +268,6 @@ class Entity:
         attackAngle = self.rotateAngle
         self.vectorAttackX = Vector(middleX, middleY, attackAngle)
         self.vectorAttackY = Vector(middleX, middleY, attackAngle+90)
-        
         if self.rotateAngle == 0:
             shiftAttackX = self.attackWidth/2
             shiftAttackY = self.attackHeight/2
@@ -326,6 +324,7 @@ class Entity:
                 self.vectorEnemyRightX.getIntersection(self.vectorEnemyLeftY)
             ]
 
+    def projectCorners(self, enemy):
         for vector in [self.vectorEnemyX, 
                     self.vectorEnemyY]:
             for (x, y) in self.cornersAttack:
@@ -342,6 +341,7 @@ class Entity:
         self.fourPointsEnemy1 = self.projectedEnemy[:4]
         self.fourPointsEnemy2 = self.projectedEnemy[4:]
 
+    def countLineSegmentOverlap(self, enemy):
         if self.rotateAngle == 0:
             self.twoPointsAttack1 = [self.fourPointsAttack1[0], self.fourPointsAttack1[3]]
             self.twoPointsAttack2 = [self.fourPointsAttack2[0], self.fourPointsAttack2[3]]
@@ -373,8 +373,7 @@ class Entity:
         referencePointEnemy1X2 = ((x1+x3)/2, (y1+y3)/2)
         referencePointEnemy2X1 = ((x0+x1)/2, (y0+y1)/2)
         referencePointEnemy2X2 = ((x2+x3)/2, (y2+y3)/2)
-        
-        
+
         [(endX1, endY1), (endX2, endY2)] = self.twoPointsEnemy1
         x0, y0 = referencePointAttack1X1[0], referencePointAttack1X1[1]
         x1, y1 = referencePointAttack1X2[0], referencePointAttack1X2[1]
@@ -411,15 +410,20 @@ class Entity:
             (endX1 <= x0 and endX1 >= x1) or (endX1 >= x0 and endX1 <= x1) or
             (endX2 <= x0 and endX2 >= x1) or (endX2 >= x0 and endX2 <= x1)):
             self.projectionCollisions += 1
-        
+
+    def rotatingAxisAlgorithm(self, enemy):
         if self.projectionCollisions == 4:
             self.projectionCollisions = 0
             return True
         else:
             self.projectionCollisions = 0
             return False
-        
-        
+    def checkAttackColliding(self, enemy):
+        self.initializeVariables()
+        self.getRotatedCorners(enemy)
+        self.projectCorners(enemy)
+        self.countLineSegmentOverlap(enemy)
+        return self.rotatingAxisAlgorithm(enemy)
 
     def checkCollidingOuterOval(self, terrain):
         if (self.jumping == True or self.isPogoing == True) and self.reachFallPortion == False:
